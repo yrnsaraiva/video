@@ -22,31 +22,10 @@ const Sparkle: React.FC<{size: number; rotate?: number}> = ({size, rotate = 0}) 
   </svg>
 );
 
-/** Cabeçalho e rodapé comuns a todos os slides. */
-const Chrome: React.FC<{index: number; accent?: string}> = ({index, accent = BRAND}) => {
-  const last = index === TOTAL - 1;
-  return (
-    <>
-      <Img src={staticFile("wordmark-yellow.png")} style={{position: "absolute", left: PAD, top: 56, height: 46}} />
-      <div style={{position: "absolute", right: PAD, top: 56, fontFamily: OSWALD, fontWeight: 500, fontSize: 34, letterSpacing: 4, color: "#fff", lineHeight: "46px"}}>
-        {String(index + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}
-      </div>
-      <div style={{position: "absolute", left: PAD, right: PAD, bottom: 56, display: "flex", alignItems: "center", justifyContent: "space-between"}}>
-        <div style={{display: "flex", gap: 10, alignItems: "center"}}>
-          {SLIDES.map((_, i) => (
-            <div key={i} style={{height: 10, width: i === index ? 44 : 10, borderRadius: 5, background: i === index ? accent : "rgba(255,255,255,0.35)"}} />
-          ))}
-        </div>
-        {!last && (
-          <div style={{display: "flex", alignItems: "center", gap: 14, fontFamily: OSWALD, fontWeight: 500, fontSize: 32, letterSpacing: 6, color: "#fff"}}>
-            DESLIZA
-            <svg width="46" height="24" viewBox="0 0 46 24" fill="none" stroke={accent} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12h40M32 3l10 9-10 9" /></svg>
-          </div>
-        )}
-      </div>
-    </>
-  );
-};
+/** Cabeçalho comum a todos os slides: só o logo. */
+const Chrome: React.FC<{index: number; accent?: string}> = () => (
+  <Img src={staticFile("wordmark-yellow.png")} style={{position: "absolute", left: PAD, top: 56, height: 46}} />
+);
 
 const CAPTION = (n: number): {t: string; hl?: boolean}[] => [
   {t: "Aqui estão "}, {t: `${n} factos`, hl: true}, {t: " sobre o "}, {t: "RUNWITHBROTO", hl: true}, {t: ". Desliza para descobrir."},
@@ -240,7 +219,7 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
       )}
       {s.cut && <Img src={staticFile(s.cut)} style={{position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos}} />}
       <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0.5) 0%, rgba(11,11,11,0) 22%, rgba(11,11,11,0) 38%, rgba(11,11,11,0.82) 66%, rgba(11,11,11,0.95) 100%)"}} />
-      <div style={{position: "absolute", left: PAD, right: PAD, bottom: 140}}>
+      <div style={{position: "absolute", left: PAD, right: PAD, bottom: 96}}>
         <div style={{display: "flex", alignItems: "center", gap: 18, marginBottom: 22}}>
           <div style={{background: s.accent, color: INK, fontFamily: OSWALD, fontWeight: 700, fontSize: 38, letterSpacing: 5, padding: "8px 24px", borderRadius: 8}}>{s.kicker}</div>
           <div style={{fontFamily: OSWALD, fontWeight: 500, fontSize: 34, letterSpacing: 7, color: "#fff"}}>{s.chapter}</div>
