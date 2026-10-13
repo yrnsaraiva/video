@@ -7,7 +7,7 @@ export const HANDLE = "@runwithbroto_";
 
 export type FactSlide = {
   kind: "fact"; kicker: string; chapter: string; title: string; body: string; photo: string; cut?: string; pos: string;
-  accent: string; night?: boolean; shift?: number; diagram?: "hybrid" | "night"; stat?: {text: string; stamp?: boolean; led?: boolean};
+  accent: string; night?: boolean; shift?: number; diagram?: "hybrid" | "night"; stat?: {text: string; stamp?: boolean; led?: boolean; ribbon?: boolean};
 };
 export type Slide = {kind: "cover"; prompt: string; photo: string; pos: string} | FactSlide | {kind: "cta"};
 
@@ -16,7 +16,7 @@ const BRAND = "#fabb00";
 const LOOK = [
   {pos: "49% 50%", shift: 170}, {pos: "28% 50%"}, {pos: "50% 60%"}, {pos: "50% 0%", shift: 290, diagram: "night"}, {pos: "50% 60%", diagram: "hybrid"}, {pos: "50% 50%"}, {pos: "50% 40%"}, {pos: "50% 0%"},
 ];
-const STAT = [undefined, undefined, undefined, undefined, undefined, {text: "+2500", led: true}, {text: "+1 000"}, {text: "25 JUN", stamp: true}];
+const STAT = [undefined, undefined, undefined, undefined, undefined, {text: "+2500", led: true}, {text: "+1 000", ribbon: true}, {text: "25 JUN", stamp: true}];
 
 export const SLIDES: Slide[] = [
   {kind: "cover", prompt: PROMPT, photo: "photos/cover.jpg", pos: "50% 0%"},
