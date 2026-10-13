@@ -37,22 +37,22 @@ const sliceSegs = (segs: {t: string; hl?: boolean}[], n: number) => {
 const CoverChat: React.FC<{prompt: string; photo: string; pos: string; still?: boolean}> = ({prompt, photo, pos, still}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const CLIP = 130; // o vídeo dele corre até aos ~4,3 s (ele ao centro); depois fica parado
-  const f = still ? 9999 : frame - 64; // a conversa começa aos 64 frames (~2 s), com ele a mexer no relógio
+  const CLIP = 194; // o vídeo dele corre inteiro (6,5 s); só depois fica parado
+  const f = still ? 9999 : frame - 100; // a conversa começa aos 100 frames (~3,3 s), com ele ainda a mexer no relógio
   const enter = spring({frame: f, fps, config: {damping: 15, stiffness: 120}});
-  const typed = Math.floor(interpolate(f, [16, 92], [0, prompt.length], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
-  const sent = f >= 98;
-  const press = interpolate(f, [98, 103, 112], [1, 0.86, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
-  const pulse = !sent && f > 80 ? 1 + 0.08 * Math.sin((f - 80) * 0.5) : 1;
-  const ring = interpolate(f, [98, 118], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const typed = Math.floor(interpolate(f, [10, 64], [0, prompt.length], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
+  const sent = f >= 70;
+  const press = interpolate(f, [70, 75, 84], [1, 0.86, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const pulse = !sent && f > 54 ? 1 + 0.08 * Math.sin((f - 54) * 0.5) : 1;
+  const ring = interpolate(f, [70, 90], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
   const caret = !sent && typed < prompt.length && Math.floor(f / 10) % 2 === 0;
-  const think = f >= 112 && f < 140;
-  const respIn = interpolate(f, [112, 124], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const think = f >= 84 && f < 106;
+  const respIn = interpolate(f, [84, 96], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
   const caption = CAPTION(FACTS.length);
   const capLen = caption.reduce((n, g) => n + g.t.length, 0);
-  const capTyped = Math.floor(interpolate(f, [140, 214], [0, capLen], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
-  const zoom = still ? 1.05 : interpolate(frame, [0, 300], [1, 1.05], {extrapolateRight: "clamp"});
-  const shade = still ? 1 : interpolate(f, [0, 36], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const capTyped = Math.floor(interpolate(f, [106, 170], [0, capLen], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
+  const zoom = still ? 1.05 : interpolate(frame, [0, 330], [1, 1.05], {extrapolateRight: "clamp"});
+  const shade = still ? 1 : interpolate(f, [0, 30], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
   const parts = prompt.slice(0, still ? prompt.length : typed).split(/(Gemini,|factos mais interessantes|RUNWITHBROTO)/);
   return (
     <AbsoluteFill style={{background: INK}}>
