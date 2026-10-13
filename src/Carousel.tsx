@@ -1,6 +1,7 @@
 import React from "react";
 import {AbsoluteFill, Img, staticFile} from "remotion";
 import {BRAND, INK, INTER, OSWALD} from "./theme";
+import {FACTS} from "./facts";
 import {FactSlide, H, HANDLE, SLIDES, W} from "./carousel";
 
 const PAD = 64;
@@ -64,19 +65,30 @@ const Cover: React.FC<{prompt: string; photo: string; pos: string}> = ({prompt, 
         </div>
       </div>
       <div style={{position: "absolute", left: PAD, right: PAD, bottom: 150}}>
-        <div style={{fontFamily: OSWALD, fontWeight: 700, fontSize: 250, lineHeight: 0.95, color: BRAND, textTransform: "uppercase"}}>6 factos</div>
+        <div style={{fontFamily: OSWALD, fontWeight: 700, fontSize: 250, lineHeight: 0.95, color: BRAND, textTransform: "uppercase"}}>{FACTS.length} factos</div>
         <div style={{fontFamily: OSWALD, fontWeight: 500, fontSize: 64, letterSpacing: 4, color: "#fff", textTransform: "uppercase", marginTop: 6}}>sobre o RUNWITHBROTO</div>
       </div>
     </AbsoluteFill>
   );
 };
 
+/** Lua e estrelas para o capítulo da Night Run. */
+const Moon: React.FC = () => (
+  <svg width="1080" height="1350" viewBox="0 0 1080 1350" style={{position: "absolute", inset: 0}}>
+    {[[180, 220, 4], [320, 160, 3], [520, 250, 3], [640, 190, 4], [760, 330, 3], [900, 470, 3], [120, 400, 3], [430, 120, 3]].map(([x, y, r], i) => <circle key={i} cx={x} cy={y} r={r} fill="#fff" opacity={0.8} />)}
+    <defs><mask id="moonMask"><rect width="1080" height="1350" fill="#fff" /><circle cx="915" cy="232" r="80" fill="#000" /></mask></defs>
+    <circle cx="880" cy="250" r="86" fill="#eef4ff" mask="url(#moonMask)" />
+  </svg>
+);
+
 const Fact: React.FC<{s: FactSlide}> = ({s}) => {
   const lines = s.title.split("\n");
   const stat = s.stat;
   return (
     <AbsoluteFill style={{background: INK}}>
-      <Img src={staticFile(s.photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos, filter: s.cut ? "blur(4px) brightness(0.8)" : undefined}} />
+      <Img src={staticFile(s.photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos, filter: s.cut ? "blur(4px) brightness(0.8)" : s.night ? "brightness(0.55) saturate(0.7) contrast(1.1)" : undefined}} />
+      {s.night && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(8,24,70,0.78) 0%, rgba(14,40,110,0.45) 100%)", mixBlendMode: "multiply"}} />}
+      {s.night && <Moon />}
       {s.cut && (
         <div style={{position: "absolute", left: 0, right: 0, top: 120, textAlign: "center", fontFamily: OSWALD, fontWeight: 700, fontSize: 760, lineHeight: 1, color: s.accent, opacity: 0.95}}>
           {s.kicker.slice(-2)}
