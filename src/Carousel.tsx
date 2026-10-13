@@ -236,8 +236,8 @@ const LedNumber: React.FC<{text: string; accent: string}> = ({text, accent}) => 
   );
 };
 
-/** Facto 7: o laço rosa da consciencialização, feito de pontos (muitas pessoas), ao lado do número. */
-const RibbonBoard: React.FC<{text: string; accent: string}> = ({text, accent}) => {
+/** Facto 7: o laço rosa da consciencialização, feito de pontos, e o número — no céu, sem tapar a multidão. */
+const RibbonRow: React.FC<{text: string; accent: string}> = ({text, accent}) => {
   // laço clássico: argola oca em cima e duas pontas que se cruzam em X
   const shape = (
     <>
@@ -246,22 +246,21 @@ const RibbonBoard: React.FC<{text: string; accent: string}> = ({text, accent}) =
       <line x1="132" y1="104" x2="48" y2="268" />
     </>
   );
-  const T = "translate(52 20) scale(1.1)";
+  const T = "translate(6 6) scale(0.86)";
   return (
-    <svg width="952" height="340" viewBox="0 0 952 340" style={{display: "block", marginBottom: 26}}>
+    <svg width="952" height="250" viewBox="0 0 952 250" style={{position: "absolute", left: PAD, top: 70, filter: "drop-shadow(0 3px 10px rgba(0,0,0,0.65))"}}>
       <defs>
-        <pattern id="rdots" width="11" height="11" patternUnits="userSpaceOnUse">
-          <circle cx="5.5" cy="5.5" r="4.1" fill={accent} />
+        <pattern id="rdots" width="10" height="10" patternUnits="userSpaceOnUse">
+          <circle cx="5" cy="5" r="3.8" fill={accent} />
         </pattern>
         <mask id="rmask">
-          <rect width="952" height="340" fill="#000" />
+          <rect width="952" height="250" fill="#000" />
           <g transform={T} fill="none" stroke="#fff" strokeWidth="30" strokeLinecap="round">{shape}</g>
         </mask>
       </defs>
-      <rect x="1" y="1" width="950" height="338" rx="30" fill="rgba(8,8,10,0.88)" stroke="rgba(255,255,255,0.14)" strokeWidth="2" />
-      <g transform={T} fill="none" stroke={accent} strokeWidth="34" strokeLinecap="round" opacity="0.16">{shape}</g>
-      <g mask="url(#rmask)"><rect width="952" height="340" fill="url(#rdots)" /></g>
-      <text x="338" y="236" fontFamily={OSWALD} fontWeight={700} fontSize="176" fill={accent} style={{filter: `drop-shadow(0 0 22px ${accent}66)`}}>{text}</text>
+      <g transform={T} fill="none" stroke={accent} strokeWidth="34" strokeLinecap="round" opacity="0.22">{shape}</g>
+      <g mask="url(#rmask)"><rect width="952" height="250" fill="url(#rdots)" /></g>
+      <text x="196" y="196" fontFamily={OSWALD} fontWeight={700} fontSize="200" fill={accent}>{text}</text>
     </svg>
   );
 };
@@ -277,6 +276,7 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
       {s.diagram && <AbsoluteFill style={{background: s.diagram === "night" ? "linear-gradient(180deg, rgba(8,14,36,0.9) 0%, rgba(8,14,36,0.75) 21%, rgba(8,14,36,0) 36%)" : "linear-gradient(180deg, rgba(11,11,11,0.65) 0%, rgba(11,11,11,0.2) 45%, rgba(11,11,11,0) 100%)"}} />}
       {s.diagram === "hybrid" && <HybridDiagram />}
       {s.diagram === "night" && <NightArt accent={s.accent} />}
+      {s.diagram === "ribbon" && s.stat && <RibbonRow text={s.stat.text} accent={s.accent} />}
       {s.cut && (
         <div style={{position: "absolute", left: 0, right: 0, top: 120, textAlign: "center", fontFamily: OSWALD, fontWeight: 700, fontSize: 760, lineHeight: 1, color: s.accent, opacity: 0.95}}>
           {s.kicker.slice(-2)}
@@ -290,7 +290,6 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
           <div style={{fontFamily: OSWALD, fontWeight: 500, fontSize: 34, letterSpacing: 7, color: "#fff"}}>{s.chapter}</div>
         </div>
         {stat && stat.led && <LedNumber text={stat.text} accent={s.accent} />}
-        {stat && stat.ribbon && <RibbonBoard text={stat.text} accent={s.accent} />}
         {stat && !stat.led && !stat.ribbon && (stat.stamp
           ? <div style={{display: "inline-block", background: s.accent, color: INK, fontFamily: OSWALD, fontWeight: 700, fontSize: 190, lineHeight: 1, padding: "4px 30px 12px", borderRadius: 8, transform: "rotate(-3deg)", marginBottom: 14}}>{stat.text}</div>
           : <div style={{fontFamily: OSWALD, fontWeight: 700, fontSize: 250, lineHeight: 0.95, color: s.accent, textShadow: "0 6px 40px rgba(0,0,0,0.5)"}}>{stat.text}</div>)}
