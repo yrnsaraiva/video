@@ -86,7 +86,7 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
   const stat = s.stat;
   return (
     <AbsoluteFill style={{background: INK}}>
-      <Img src={staticFile(s.photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos, filter: s.cut ? "blur(4px) brightness(0.8)" : s.night ? "brightness(0.55) saturate(0.7) contrast(1.1)" : undefined}} />
+      <Img src={staticFile(s.photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos, transform: s.shift ? `translateY(${-s.shift}px)` : undefined, WebkitMaskImage: s.shift ? `linear-gradient(180deg, #000 ${1350 - s.shift - 200}px, transparent ${1350 - s.shift}px)` : undefined, filter: s.cut ? "blur(4px) brightness(0.8)" : s.night ? "brightness(0.55) saturate(0.7) contrast(1.1)" : undefined}} />
       {s.night && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(8,24,70,0.78) 0%, rgba(14,40,110,0.45) 100%)", mixBlendMode: "multiply"}} />}
       {s.night && <Moon />}
       {s.cut && (
