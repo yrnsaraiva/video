@@ -3,16 +3,16 @@ import {AbsoluteFill, Img, continueRender, delayRender, interpolate, random, spr
 import {BRAND, INK, INTER, OSWALD, clamp, outExpo} from "./theme";
 
 /** Foto com Ken Burns (zoom + deslize lento). */
-export const Photo: React.FC<{src: string; dark?: number; len: number; dir?: 1 | -1; pos?: string}> = ({src, dark = 0.45, len, dir = 1, pos = "50% 50%"}) => {
+export const Photo: React.FC<{src: string; dark?: number; len: number; dir?: 1 | -1; pos?: string; overlay?: boolean; blur?: number}> = ({src, dark = 0.45, len, dir = 1, pos = "50% 50%", overlay = true, blur = 0}) => {
   const f = useCurrentFrame();
   const scale = interpolate(f, [0, len], dir === 1 ? [1.06, 1.24] : [1.24, 1.06], clamp);
   const x = interpolate(f, [0, len], [0, -40 * dir], clamp);
   return (
-    <AbsoluteFill style={{background: INK}}>
+    <AbsoluteFill style={{background: overlay ? INK : undefined}}>
       <AbsoluteFill style={{transform: `translateX(${x}px) scale(${scale})`}}>
-        <Img src={staticFile(src)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: pos}} />
+        <Img src={staticFile(src)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: pos, filter: blur ? `blur(${blur}px)` : undefined}} />
       </AbsoluteFill>
-      <AbsoluteFill style={{background: `linear-gradient(180deg, rgba(11,11,11,${dark}) 0%, rgba(11,11,11,${dark * 0.4}) 40%, rgba(11,11,11,${dark + 0.4}) 100%)`}} />
+      {overlay && <AbsoluteFill style={{background: `linear-gradient(180deg, rgba(11,11,11,${dark}) 0%, rgba(11,11,11,${dark * 0.4}) 40%, rgba(11,11,11,${dark + 0.4}) 100%)`}} />}
     </AbsoluteFill>
   );
 };
@@ -62,13 +62,22 @@ export const StoryBar: React.FC<{index: number; total: number; len: number}> = (
   );
 };
 
-/** Número gigante em contorno, atrás do texto. */
-export const Ghost: React.FC<{n: number}> = ({n}) => {
+/** Número gigante em contorno (ou preenchido e centrado, quando fica atrás de um recorte). */
+export const Ghost: React.FC<{n: number; behind?: boolean}> = ({n, behind}) => {
   const f = useCurrentFrame();
   const p = interpolate(f, [2, 26], [0, 1], {...clamp, easing: outExpo});
+  const base: React.CSSProperties = {position: "absolute", fontFamily: OSWALD, fontWeight: 700, lineHeight: 1, pointerEvents: "none"};
+  if (behind) {
+    return (
+      <div style={{...base, left: 0, right: 0, textAlign: "center", top: 140, fontSize: 880, color: BRAND, opacity: 0.95 * p,
+        transform: `translateY(${(1 - p) * 260}px) scale(${1.1 - 0.1 * p + f * 0.0007})`}}>
+        {String(n).padStart(2, "0")}
+      </div>
+    );
+  }
   return (
-    <div style={{position: "absolute", right: -20, top: 150, fontFamily: OSWALD, fontWeight: 700, fontSize: 560, lineHeight: 1, color: "transparent",
-      WebkitTextStroke: "5px rgba(250,187,0,0.55)", opacity: p, transform: `translateX(${(1 - p) * 420 - f * 0.9}px)`, pointerEvents: "none"}}>
+    <div style={{...base, right: -20, top: 150, fontSize: 560, color: "transparent", WebkitTextStroke: "5px rgba(250,187,0,0.55)", opacity: p,
+      transform: `translateX(${(1 - p) * 420 - f * 0.9}px)`}}>
       {String(n).padStart(2, "0")}
     </div>
   );

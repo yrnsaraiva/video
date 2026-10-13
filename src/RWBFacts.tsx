@@ -98,12 +98,19 @@ const FactScene: React.FC<{i: number}> = ({i}) => {
             <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0.4) 0%, rgba(11,11,11,0.15) 40%, rgba(11,11,11,0.8) 100%)"}} />
           </AbsoluteFill>
         ) : (
-          <Photo src={fact.photo} len={FACT_LEN} dir={i % 2 === 0 ? 1 : -1} dark={0.4} pos={fact.pos} />
+          <Photo src={fact.photo} len={FACT_LEN} dir={i % 2 === 0 ? 1 : -1} dark={fact.cut ? 0.62 : 0.4} pos={fact.pos} blur={fact.cut ? 5 : 0} />
         )}
       </Punch>
+      {/* Profundidade: o número fica entre o fundo e o sujeito recortado */}
+      <Ghost n={i + 1} behind={!!fact.cut} />
+      {fact.cut && (
+        <Punch>
+          <Photo src={fact.cut} len={FACT_LEN} dir={i % 2 === 0 ? 1 : -1} pos={fact.pos} overlay={false} />
+        </Punch>
+      )}
+      {fact.cut && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0) 45%, rgba(11,11,11,0.78) 78%, rgba(11,11,11,0.9) 100%)"}} />}
       <Vignette />
       <Sparks seed={i} />
-      <Ghost n={i + 1} />
       {fact.route && <Route from={fact.route[0]} to={fact.route[1]} />}
       {fact.badge && <Badge center={fact.badge.center} ring={fact.badge.ring} />}
       <AbsoluteFill style={{justifyContent: "flex-end", padding: "0 70px 250px"}}>

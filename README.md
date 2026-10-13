@@ -12,6 +12,7 @@ npm run build    # gera out/rwb-facts.mp4
 - **Textos e elementos de cada facto:** `src/facts.ts` (pergunta, título, texto, foto, duração `FACT_LEN`).
   Elementos opcionais por facto: `stat` (contador `{to: 2500, prefix: "+"}` ou carimbo `{text: "25 JUN"}`),
   `route` (rota animada A→B) e `badge` (selo giratório).
+- **Efeito de profundidade:** `cut: "photos/NN-cut.png"` num facto (PNG recortado, do mesmo tamanho da foto) põe o número gigante atrás do sujeito. Os recortes foram feitos localmente com `@imgly/background-removal-node`.
 - **Fotos/vídeos:** `public/photos/02…07.jpg` (cenas dos factos), `public/videos/01.mp4` (fundo da abertura),
   `public/videos/07.mp4` (fundo do facto 6). Vídeos devem ser H.264/SDR (converter HEVC/HDR com ffmpeg antes).
 - **Transições entre cenas:** `KINDS` em `src/RWBFacts.tsx` (`wipe`, `stripes`, `iris`, `slats`); código em `src/Transitions.tsx`.
