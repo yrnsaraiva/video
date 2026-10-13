@@ -201,6 +201,42 @@ const NightArt: React.FC<{accent: string}> = ({accent}) => {
   );
 };
 
+/** Painel de pontos luminosos (estilo LED) a escrever o número. */
+const LED_FONT: Record<string, string[]> = {
+  "0": ["01110", "10001", "10011", "10101", "11001", "10001", "01110"],
+  "1": ["00100", "01100", "00100", "00100", "00100", "00100", "01110"],
+  "2": ["01110", "10001", "00001", "00010", "00100", "01000", "11111"],
+  "5": ["11111", "10000", "11110", "00001", "00001", "10001", "01110"],
+  "+": ["00000", "00100", "00100", "11111", "00100", "00100", "00000"],
+};
+const LedNumber: React.FC<{text: string; accent: string}> = ({text, accent}) => {
+  const P = 28; // passo entre pontos
+  const PAD_BOARD = 30;
+  const lit: {x: number; y: number}[] = [];
+  const off: {x: number; y: number}[] = [];
+  let col = 0;
+  text.split("").forEach((c, k) => {
+    LED_FONT[c].forEach((row, y) => row.split("").forEach((v, x) => (v === "1" ? lit : off).push({x: col + x, y})));
+    col += 5 + (k === 1 ? 3 : 1); // pausa maior a seguir ao 2 (lê-se "2 500")
+  });
+  const cols = col - 1;
+  const w = cols * P + PAD_BOARD * 2, h = 7 * P + PAD_BOARD * 2;
+  const cx = (x: number) => PAD_BOARD + x * P + P / 2, cy = (y: number) => PAD_BOARD + y * P + P / 2;
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{display: "block", marginBottom: 26}}>
+      <rect x="1" y="1" width={w - 2} height={h - 2} rx="30" fill="rgba(8,8,10,0.88)" stroke="rgba(255,255,255,0.14)" strokeWidth="2" />
+      {off.map(({x, y}, i) => <circle key={`o${i}`} cx={cx(x)} cy={cy(y)} r={4} fill="#fff" opacity={0.14} />)}
+      {lit.map(({x, y}, i) => (
+        <g key={i}>
+          <circle cx={cx(x)} cy={cy(y)} r={13} fill={accent} opacity={0.22} />
+          <circle cx={cx(x)} cy={cy(y)} r={10.5} fill={accent} />
+          <circle cx={cx(x) - 3} cy={cy(y) - 3} r={3.6} fill="#fff" opacity={0.6} />
+        </g>
+      ))}
+    </svg>
+  );
+};
+
 const Fact: React.FC<{s: FactSlide}> = ({s}) => {
   const lines = s.title.split("\n");
   const stat = s.stat;
@@ -224,7 +260,8 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
           <div style={{background: s.accent, color: INK, fontFamily: OSWALD, fontWeight: 700, fontSize: 38, letterSpacing: 5, padding: "8px 24px", borderRadius: 8}}>{s.kicker}</div>
           <div style={{fontFamily: OSWALD, fontWeight: 500, fontSize: 34, letterSpacing: 7, color: "#fff"}}>{s.chapter}</div>
         </div>
-        {stat && (stat.stamp
+        {stat && stat.led && <LedNumber text={stat.text} accent={s.accent} />}
+        {stat && !stat.led && (stat.stamp
           ? <div style={{display: "inline-block", background: s.accent, color: INK, fontFamily: OSWALD, fontWeight: 700, fontSize: 190, lineHeight: 1, padding: "4px 30px 12px", borderRadius: 8, transform: "rotate(-3deg)", marginBottom: 14}}>{stat.text}</div>
           : <div style={{fontFamily: OSWALD, fontWeight: 700, fontSize: 250, lineHeight: 0.95, color: s.accent, textShadow: "0 6px 40px rgba(0,0,0,0.5)"}}>{stat.text}</div>)}
         {lines.map((l, k) => {
@@ -236,7 +273,7 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
             </div>
           );
         })}
-        <div style={{fontFamily: INTER, fontWeight: 500, fontSize: 38, lineHeight: 1.35, color: "#ececec", marginTop: 26, maxWidth: 900}}>{s.body}</div>
+        {s.body && <div style={{fontFamily: INTER, fontWeight: 500, fontSize: 38, lineHeight: 1.35, color: "#ececec", marginTop: 26, maxWidth: 900}}>{s.body}</div>}
       </div>
     </AbsoluteFill>
   );
