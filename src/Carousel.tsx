@@ -38,21 +38,22 @@ const CoverChat: React.FC<{prompt: string; photo: string; pos: string; still?: b
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const CLIP = 194; // o vídeo dele corre inteiro (6,5 s); só depois fica parado
-  const f = still ? 9999 : frame - 100; // a conversa começa aos 100 frames (~3,3 s), com ele ainda a mexer no relógio
-  const enter = spring({frame: f, fps, config: {damping: 15, stiffness: 120}});
-  const typed = Math.floor(interpolate(f, [10, 64], [0, prompt.length], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
-  const sent = f >= 70;
-  const press = interpolate(f, [70, 75, 84], [1, 0.86, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
-  const pulse = !sent && f > 54 ? 1 + 0.08 * Math.sin((f - 54) * 0.5) : 1;
-  const ring = interpolate(f, [70, 90], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const f = still ? 9999 : frame;
+  // Sincronizado com o clipe: ele "escreve" no relógio de ~0,8 s a ~5,6 s e começa a sorrir aos ~6,0 s (frame 180)
+  const enter = spring({frame: f - 14, fps, config: {damping: 15, stiffness: 120}});
+  const typed = Math.floor(interpolate(f, [26, 156], [0, prompt.length], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
+  const sent = f >= 160;
+  const press = interpolate(f, [160, 165, 174], [1, 0.86, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const pulse = !sent && f > 142 ? 1 + 0.08 * Math.sin((f - 142) * 0.5) : 1;
+  const ring = interpolate(f, [160, 180], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
   const caret = !sent && typed < prompt.length && Math.floor(f / 10) % 2 === 0;
-  const think = f >= 84 && f < 106;
-  const respIn = interpolate(f, [84, 96], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const think = f >= 164 && f < 180;
+  const respIn = interpolate(f, [164, 174], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
   const caption = CAPTION(FACTS.length);
   const capLen = caption.reduce((n, g) => n + g.t.length, 0);
-  const capTyped = Math.floor(interpolate(f, [106, 170], [0, capLen], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
-  const zoom = still ? 1.05 : interpolate(frame, [0, 330], [1, 1.05], {extrapolateRight: "clamp"});
-  const shade = still ? 1 : interpolate(f, [0, 30], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const capTyped = Math.floor(interpolate(f, [180, 245], [0, capLen], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
+  const zoom = still ? 1.05 : interpolate(frame, [0, 300], [1, 1.05], {extrapolateRight: "clamp"});
+  const shade = still ? 1 : interpolate(f, [10, 40], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
   const parts = prompt.slice(0, still ? prompt.length : typed).split(/(Gemini,|factos mais interessantes|RUNWITHBROTO)/);
   return (
     <AbsoluteFill style={{background: INK}}>
@@ -104,6 +105,7 @@ const CoverChat: React.FC<{prompt: string; photo: string; pos: string; still?: b
           </div>
         )}
       </div>
+      <Img src={staticFile("wordmark-yellow.png")} style={{position: "absolute", left: PAD, top: 56, height: 46}} />
     </AbsoluteFill>
   );
 };
