@@ -22,10 +22,6 @@ const Sparkle: React.FC<{size: number; rotate?: number}> = ({size, rotate = 0}) 
   </svg>
 );
 
-/** Cabeçalho comum a todos os slides: só o logo. */
-const Chrome: React.FC<{index: number; accent?: string}> = () => (
-  <Img src={staticFile("wordmark-yellow.png")} style={{position: "absolute", left: PAD, top: 56, height: 46}} />
-);
 
 const CAPTION = (n: number): {t: string; hl?: boolean}[] => [
   {t: "Aqui estão "}, {t: `${n} factos`, hl: true}, {t: " sobre o "}, {t: "RUNWITHBROTO", hl: true}, {t: ". Desliza para descobrir."},
@@ -305,7 +301,6 @@ export const Carousel: React.FC<{index: number}> = ({index}) => {
       {s.kind === "cover" && <CoverChat prompt={s.prompt} photo={s.photo} pos={s.pos} still />}
       {s.kind === "fact" && <Fact s={s} />}
       {s.kind === "cta" && <Cta />}
-      <Chrome index={index} accent={accent} />
     </AbsoluteFill>
   );
 };
@@ -317,7 +312,6 @@ export const CoverVideo: React.FC = () => {
   return (
     <AbsoluteFill style={{width: W, height: H, background: INK}}>
       <CoverChat prompt={s.prompt} photo={s.photo} pos={s.pos} />
-      <Chrome index={0} />
     </AbsoluteFill>
   );
 };
