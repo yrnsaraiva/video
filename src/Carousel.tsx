@@ -176,6 +176,54 @@ const HybridDiagram: React.FC = () => {
   );
 };
 
+/** Ilustração da Night Run: o caracol, a quinta-feira da semana e a lua. */
+const spiral = (cx: number, cy: number, turns: number, b: number) => {
+  let d = "";
+  for (let a = 0; a <= turns * 2 * Math.PI; a += 0.15) {
+    const r = 2 + b * a;
+    d += `${d ? "L" : "M"}${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)} `;
+  }
+  return d;
+};
+const NightArt: React.FC<{accent: string}> = ({accent}) => {
+  const DAYS = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"];
+  const x = (i: number) => 305 + i * 88;
+  return (
+    <svg width="952" height="180" viewBox="0 0 952 180" style={{position: "absolute", left: PAD, top: 116, filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.7))"}}>
+      <defs>
+        <mask id="moonM"><rect width="100" height="100" fill="#fff" /><circle cx="62" cy="40" r="26" fill="#000" /></mask>
+      </defs>
+      {[[268, 26, 3], [884, 34, 3], [930, 92, 2.5], [740, 20, 2.5], [210, 22, 2.5]].map(([cx, cy, r], i) => <circle key={i} cx={cx} cy={cy} r={r} fill="#fff" opacity="0.85" />)}
+      {/* o caracol */}
+      <g>
+        <path d="M22 150 Q100 174 176 154 Q198 148 192 124" fill="none" stroke="#e4ecff" strokeWidth="18" strokeLinecap="round" />
+        <line x1="192" y1="126" x2="180" y2="96" stroke="#e4ecff" strokeWidth="5" strokeLinecap="round" />
+        <line x1="198" y1="124" x2="210" y2="98" stroke="#e4ecff" strokeWidth="5" strokeLinecap="round" />
+        <circle cx="179" cy="92" r="6" fill="#e4ecff" /><circle cx="211" cy="94" r="6" fill="#e4ecff" />
+        <circle cx="98" cy="92" r="58" fill={accent} />
+        <path d={spiral(98, 92, 2.4, 3.2)} fill="none" stroke="#0b1b4a" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+      {/* a semana: quinta-feira em destaque */}
+      {DAYS.map((d, i) => {
+        const on = i === 3;
+        return (
+          <g key={d}>
+            <text x={x(i)} y={42} textAnchor="middle" fontFamily={OSWALD} fontWeight={on ? 700 : 500} fontSize={on ? 32 : 26} letterSpacing="2" fill={on ? accent : "#fff"} opacity={on ? 1 : 0.7}>{d}</text>
+            {on ? (
+              <g>
+                <circle cx={x(i)} cy={96} r={46} fill={accent} opacity="0.25" />
+                <circle cx={x(i)} cy={96} r={36} fill={accent} />
+                <g transform={`translate(${x(i) - 22} ${96 - 22}) scale(0.44)`}><circle cx="50" cy="50" r="40" fill="#0b1b4a" mask="url(#moonM)" /></g>
+              </g>
+            ) : <circle cx={x(i)} cy={96} r={22} fill="none" stroke="#fff" strokeWidth="3" opacity="0.4" />}
+          </g>
+        );
+      })}
+      <text x="569" y="170" textAnchor="middle" fontFamily={OSWALD} fontWeight={500} fontSize="28" letterSpacing="8" fill="#fff">NIGHT RUN · CARACOL</text>
+    </svg>
+  );
+};
+
 const Fact: React.FC<{s: FactSlide}> = ({s}) => {
   const lines = s.title.split("\n");
   const stat = s.stat;
@@ -184,8 +232,9 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
       <Img src={staticFile(s.photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos, transform: s.shift ? `translateY(${-s.shift}px)` : undefined, WebkitMaskImage: s.shift ? `linear-gradient(180deg, #000 ${1350 - s.shift - 200}px, transparent ${1350 - s.shift}px)` : undefined, filter: s.cut ? "blur(4px) brightness(0.8)" : s.night ? "brightness(0.55) saturate(0.7) contrast(1.1)" : undefined}} />
       {s.night && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(8,24,70,0.78) 0%, rgba(14,40,110,0.45) 100%)", mixBlendMode: "multiply"}} />}
       {s.night && <Moon />}
-      {s.diagram && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0.6) 0%, rgba(11,11,11,0.2) 45%, rgba(11,11,11,0) 100%)"}} />}
-      {s.diagram && <HybridDiagram />}
+      {s.diagram && <AbsoluteFill style={{background: s.diagram === "night" ? "linear-gradient(180deg, rgba(8,14,36,0.9) 0%, rgba(8,14,36,0.75) 21%, rgba(8,14,36,0) 36%)" : "linear-gradient(180deg, rgba(11,11,11,0.65) 0%, rgba(11,11,11,0.2) 45%, rgba(11,11,11,0) 100%)"}} />}
+      {s.diagram === "hybrid" && <HybridDiagram />}
+      {s.diagram === "night" && <NightArt accent={s.accent} />}
       {s.cut && (
         <div style={{position: "absolute", left: 0, right: 0, top: 120, textAlign: "center", fontFamily: OSWALD, fontWeight: 700, fontSize: 760, lineHeight: 1, color: s.accent, opacity: 0.95}}>
           {s.kicker.slice(-2)}
@@ -206,7 +255,7 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
           return (
             <div key={k} style={{position: "relative", display: "block", width: "fit-content"}}>
               {hl && <div style={{position: "absolute", inset: "2px -16px 0 -16px", background: s.accent}} />}
-              <div style={{position: "relative", fontFamily: OSWALD, fontWeight: 700, fontSize: stat ? 100 : s.diagram ? 100 : 112, lineHeight: 1.18, textTransform: "uppercase", color: hl ? INK : "#fff"}}>{l}</div>
+              <div style={{position: "relative", fontFamily: OSWALD, fontWeight: 700, fontSize: stat ? 100 : s.diagram === "hybrid" ? 100 : 112, lineHeight: 1.18, textTransform: "uppercase", color: hl ? INK : "#fff"}}>{l}</div>
             </div>
           );
         })}
