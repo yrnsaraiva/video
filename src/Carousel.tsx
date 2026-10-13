@@ -233,17 +233,64 @@ const LedNumber: React.FC<{text: string; accent: string}> = ({text, accent}) => 
   );
 };
 
+/** Facto 1: a jornada de uma pessoa (Broto) espalha-se em anéis pela comunidade. */
+const OriginArt: React.FC<{accent: string}> = ({accent}) => {
+  const C = {x: 500, y: 430}; // posição do Broto na foto
+  const RINGS = [{r: 130, n: 7, o: 0.9}, {r: 250, n: 11, o: 0.6}, {r: 370, n: 15, o: 0.38}, {r: 490, n: 0, o: 0.22}];
+  return (
+    <svg width="1080" height="1350" viewBox="0 0 1080 1350" style={{position: "absolute", left: 0, top: 0,
+      WebkitMaskImage: "linear-gradient(180deg, #000 40%, transparent 62%)"}}>
+      {RINGS.map((g, k) => (
+        <g key={k}>
+          <circle cx={C.x} cy={C.y} r={g.r} fill="none" stroke={accent} strokeWidth="3" opacity={g.o} />
+          {new Array(g.n).fill(0).map((_, i) => {
+            const t = (i / g.n) * Math.PI * 2 + k * 0.5;
+            return <circle key={i} cx={C.x + g.r * Math.cos(t)} cy={C.y + g.r * Math.sin(t)} r={9 - k * 1.5} fill={accent} opacity={g.o} />;
+          })}
+        </g>
+      ))}
+      {/* etiqueta sobre a cabeça */}
+      <g filter="drop-shadow(0 4px 10px rgba(0,0,0,0.5))">
+        <rect x={C.x - 100} y={226} width="200" height="64" rx="32" fill={accent} />
+        <polygon points={`${C.x - 14},288 ${C.x + 14},288 ${C.x},312`} fill={accent} />
+        <circle cx={C.x - 66} cy={258} r="22" fill={INK} />
+        <text x={C.x - 66} y={271} textAnchor="middle" fontFamily={OSWALD} fontWeight={700} fontSize="34" fill={accent}>B</text>
+        <text x={C.x + 16} y={271} textAnchor="middle" fontFamily={OSWALD} fontWeight={700} fontSize="36" letterSpacing="3" fill={INK}>BROTO</text>
+      </g>
+    </svg>
+  );
+};
+
+/** Facto 3: o grupo segue junto e quem ficou atrás é puxado para a frente. */
+const PackArt: React.FC<{accent: string}> = ({accent}) => (
+  <svg width="952" height="300" viewBox="0 0 952 300" style={{position: "absolute", left: PAD, top: 48, filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.6))"}}>
+    <line x1="20" y1="206" x2="932" y2="206" stroke="#fff" strokeWidth="5" strokeLinecap="round" strokeDasharray="1 18" opacity="0.5" />
+    {[0, 1, 2].map((i) => <line key={i} x1={380 + i * 8} y1={140 + i * 20} x2={500 + i * 8} y2={140 + i * 20} stroke="#fff" strokeWidth="6" strokeLinecap="round" opacity={0.55 - i * 0.14} />)}
+    {[0, 1, 2, 3, 4].map((i) => (
+      <g key={i}>
+        <circle cx={560 + i * 84} cy="162" r="32" fill={accent} />
+        <circle cx={560 + i * 84 - 9} cy="152" r="9" fill="#fff" opacity="0.6" />
+      </g>
+    ))}
+    <circle cx="120" cy="162" r="32" fill="#fff" stroke={accent} strokeWidth="9" />
+    <path d="M152,140 Q330,30 520,142" fill="none" stroke="#fff" strokeWidth="6" strokeLinecap="round" strokeDasharray="1 17" />
+    <polygon points="520,124 548,148 512,162" fill="#fff" transform="rotate(-6 520 144)" />
+  </svg>
+);
+
 const Fact: React.FC<{s: FactSlide}> = ({s}) => {
   const lines = s.title.split("\n");
   const stat = s.stat;
   return (
     <AbsoluteFill style={{background: INK}}>
-      <Img src={staticFile(s.photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos, transform: s.shift ? `translateY(${-s.shift}px)` : undefined, WebkitMaskImage: s.shift ? `linear-gradient(180deg, #000 ${1350 - s.shift - 200}px, transparent ${1350 - s.shift}px)` : undefined, filter: s.cut ? "blur(4px) brightness(0.8)" : s.night ? "brightness(0.55) saturate(0.7) contrast(1.1)" : undefined}} />
+      <Img src={staticFile(s.photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos, transform: s.shift ? `translateY(${-s.shift}px)` : undefined, WebkitMaskImage: s.shift ? (s.shift > 0 ? `linear-gradient(180deg, #000 ${1350 - s.shift - 200}px, transparent ${1350 - s.shift}px)` : `linear-gradient(180deg, transparent ${-s.shift}px, #000 ${-s.shift + 220}px)`) : undefined, filter: s.cut ? "blur(4px) brightness(0.8)" : s.night ? "brightness(0.55) saturate(0.7) contrast(1.1)" : undefined}} />
       {s.night && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(8,24,70,0.78) 0%, rgba(14,40,110,0.45) 100%)", mixBlendMode: "multiply"}} />}
       {s.night && <Moon />}
-      {s.diagram && <AbsoluteFill style={{background: s.diagram === "night" ? "linear-gradient(180deg, rgba(8,14,36,0.9) 0%, rgba(8,14,36,0.75) 21%, rgba(8,14,36,0) 36%)" : "linear-gradient(180deg, rgba(11,11,11,0.65) 0%, rgba(11,11,11,0.2) 45%, rgba(11,11,11,0) 100%)"}} />}
+      {s.diagram && s.diagram !== "pack" && <AbsoluteFill style={{background: s.diagram === "night" ? "linear-gradient(180deg, rgba(8,14,36,0.9) 0%, rgba(8,14,36,0.75) 21%, rgba(8,14,36,0) 36%)" : "linear-gradient(180deg, rgba(11,11,11,0.65) 0%, rgba(11,11,11,0.2) 45%, rgba(11,11,11,0) 100%)"}} />}
       {s.diagram === "hybrid" && <HybridDiagram />}
       {s.diagram === "night" && <NightArt accent={s.accent} />}
+      {s.diagram === "origin" && <OriginArt accent={s.accent} />}
+      {s.diagram === "pack" && <PackArt accent={s.accent} />}
       {s.cut && (
         <div style={{position: "absolute", left: 0, right: 0, top: 120, textAlign: "center", fontFamily: OSWALD, fontWeight: 700, fontSize: 760, lineHeight: 1, color: s.accent, opacity: 0.95}}>
           {s.kicker.slice(-2)}
@@ -277,18 +324,11 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
 
 const Cta: React.FC = () => (
   <AbsoluteFill style={{background: INK}}>
-    <AbsoluteFill style={{background: "radial-gradient(circle at 50% 38%, rgba(250,187,0,0.3) 0%, rgba(11,11,11,0) 62%)"}} />
+    <AbsoluteFill style={{background: "radial-gradient(circle at 50% 42%, rgba(250,187,0,0.16) 0%, rgba(11,11,11,0) 60%)"}} />
     <AbsoluteFill style={{alignItems: "center", justifyContent: "center", textAlign: "center", padding: PAD}}>
-      <Img src={staticFile("logo-yellow.png")} style={{width: 720}} />
-      <div style={{marginTop: 54, fontFamily: OSWALD, fontWeight: 700, fontSize: 130, lineHeight: 1.08, textTransform: "uppercase", color: "#fff"}}>Junta-te</div>
-      <div style={{position: "relative", marginTop: 4}}>
-        <div style={{position: "absolute", inset: "2px -22px 0 -22px", background: BRAND}} />
-        <div style={{position: "relative", fontFamily: OSWALD, fontWeight: 700, fontSize: 130, lineHeight: 1.08, textTransform: "uppercase", color: INK}}>ao clube</div>
-      </div>
-      <div style={{marginTop: 48, display: "flex", gap: 22, fontFamily: INTER, fontWeight: 600, fontSize: 46}}>
-        <span style={{color: BRAND}}>Corre.</span><span style={{color: "#fff"}}>Convive.</span><span style={{color: BRAND}}>Repete.</span>
-      </div>
-      <div style={{marginTop: 40, fontFamily: OSWALD, fontWeight: 500, fontSize: 42, letterSpacing: 5, color: "#fff"}}>{HANDLE}</div>
+      <Img src={staticFile("logo-yellow.png")} style={{width: 680}} />
+      <div style={{marginTop: 70, fontFamily: OSWALD, fontWeight: 700, fontSize: 96, lineHeight: 1.1, textTransform: "uppercase", color: "#fff", letterSpacing: 2}}>Junta-te ao clube</div>
+      <div style={{marginTop: 34, fontFamily: OSWALD, fontWeight: 500, fontSize: 42, letterSpacing: 6, color: BRAND}}>{HANDLE}</div>
     </AbsoluteFill>
   </AbsoluteFill>
 );
