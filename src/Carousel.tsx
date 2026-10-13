@@ -189,11 +189,10 @@ const NightArt: React.FC<{accent: string}> = ({accent}) => {
   const DAYS = ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"];
   const x = (i: number) => 305 + i * 88;
   return (
-    <svg width="952" height="180" viewBox="0 0 952 180" style={{position: "absolute", left: PAD, top: 116, filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.7))"}}>
+    <svg width="952" height="165" viewBox="0 0 952 165" style={{position: "absolute", left: PAD, top: 120, filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.7))"}}>
       <defs>
         <mask id="moonM"><rect width="100" height="100" fill="#fff" /><circle cx="62" cy="40" r="26" fill="#000" /></mask>
       </defs>
-      {[[268, 26, 3], [884, 34, 3], [930, 92, 2.5], [740, 20, 2.5], [210, 22, 2.5]].map(([cx, cy, r], i) => <circle key={i} cx={cx} cy={cy} r={r} fill="#fff" opacity="0.85" />)}
       {/* o caracol */}
       <g>
         <path d="M22 150 Q100 174 176 154 Q198 148 192 124" fill="none" stroke="#e4ecff" strokeWidth="18" strokeLinecap="round" />
@@ -215,11 +214,10 @@ const NightArt: React.FC<{accent: string}> = ({accent}) => {
                 <circle cx={x(i)} cy={96} r={36} fill={accent} />
                 <g transform={`translate(${x(i) - 22} ${96 - 22}) scale(0.44)`}><circle cx="50" cy="50" r="40" fill="#0b1b4a" mask="url(#moonM)" /></g>
               </g>
-            ) : <circle cx={x(i)} cy={96} r={22} fill="none" stroke="#fff" strokeWidth="3" opacity="0.4" />}
+            ) : <circle cx={x(i)} cy={96} r={7} fill="#fff" opacity="0.45" />}
           </g>
         );
       })}
-      <text x="569" y="170" textAnchor="middle" fontFamily={OSWALD} fontWeight={500} fontSize="28" letterSpacing="8" fill="#fff">NIGHT RUN · CARACOL</text>
     </svg>
   );
 };
