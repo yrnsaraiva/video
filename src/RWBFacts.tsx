@@ -116,7 +116,14 @@ const FactScene: React.FC<{i: number}> = ({i}) => {
   const body = interpolate(f, [34, 52], [0, 1], clamp);
   return (
     <AbsoluteFill style={{opacity: fadeIn * fadeOut}}>
-      <Photo src={fact.photo} len={FACT_LEN} dir={i % 2 === 0 ? 1 : -1} dark={0.4} pos={fact.pos} />
+      {fact.video ? (
+        <AbsoluteFill style={{background: INK}}>
+          <OffthreadVideo src={staticFile(fact.video)} muted style={{width: "100%", height: "100%", objectFit: "cover"}} />
+          <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0.4) 0%, rgba(11,11,11,0.15) 40%, rgba(11,11,11,0.8) 100%)"}} />
+        </AbsoluteFill>
+      ) : (
+        <Photo src={fact.photo} len={FACT_LEN} dir={i % 2 === 0 ? 1 : -1} dark={0.4} pos={fact.pos} />
+      )}
       <AbsoluteFill style={{justifyContent: "flex-end", padding: "0 70px 230px"}}>
         <div style={{display: "inline-flex", alignSelf: "flex-start", background: BRAND, color: INK, fontFamily: OSWALD, fontWeight: 700, fontSize: 44, letterSpacing: 6, padding: "10px 28px", borderRadius: 10, opacity: kick, transform: `translateY(${(1 - kick) * 30}px)`}}>
           {fact.kicker}
