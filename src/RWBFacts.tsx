@@ -1,5 +1,5 @@
 import React from "react";
-import {continueRender, delayRender, AbsoluteFill, Img, Sequence, interpolate, random, spring, staticFile, useCurrentFrame, useVideoConfig, Easing} from "remotion";
+import {OffthreadVideo, continueRender, delayRender, AbsoluteFill, Img, Sequence, interpolate, random, spring, staticFile, useCurrentFrame, useVideoConfig, Easing} from "remotion";
 import {FACTS, FACT_LEN, INTRO, OUTRO, OUTRO_PHOTO, PROMPT} from "./facts";
 
 // Fontes locais (public/fonts), para o render não depender da rede.
@@ -81,7 +81,10 @@ const Intro: React.FC = () => {
   };
   return (
     <AbsoluteFill style={{opacity: fadeOut}}>
-      <Photo src="photos/01.jpg" len={INTRO} dark={0.55} />
+      <AbsoluteFill style={{background: INK}}>
+        <OffthreadVideo src={staticFile("videos/01.mp4")} muted style={{width: "100%", height: "100%", objectFit: "cover"}} />
+        <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0.55) 0%, rgba(11,11,11,0.15) 45%, rgba(11,11,11,0.5) 100%)"}} />
+      </AbsoluteFill>
       <Rain />
       <div style={{position: "absolute", left: 60, right: 60, top: 190, transform: `translateY(${(1 - enter) * -120}px) scale(${0.92 + enter * 0.08})`, opacity: enter}}>
         <div style={{background: "rgba(11,11,11,0.94)", borderRadius: 80, padding: "64px 64px 52px", boxShadow: `0 0 0 3px rgba(255,255,255,0.18), 0 0 90px rgba(250,187,0,${pressed ? 0.15 : 0.35})`, minHeight: 440, position: "relative"}}>

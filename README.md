@@ -10,7 +10,7 @@ npm run build    # gera out/rwb-facts.mp4
 
 ## Fotos
 Fotos em `public/photos/01…08.jpg` (já com as fotos reais do clube). Ordem: 01 abertura, 02–07 factos, 08 fecho.
-`01.jpg` é o fundo da pergunta inicial; `08.jpg` o fundo do fecho; 02–07 são os 6 factos. Fotos do álbum Coffee Party:
+`videos/01.mp4` é o fundo da pergunta inicial (vídeo; `01.jpg` já não é usado); `08.jpg` o fundo do fecho; 02–07 são os 6 factos. Fotos do álbum Coffee Party:
 https://coresvivasclientesmoz.pixieset.com/runwithbrotocoffeparty/
 
 ## Textos / duração
