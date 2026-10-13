@@ -37,7 +37,7 @@ const sliceSegs = (segs: {t: string; hl?: boolean}[], n: number) => {
 const CoverChat: React.FC<{prompt: string; photo: string; pos: string; still?: boolean}> = ({prompt, photo, pos, still}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const CLIP = 194; // o vídeo dele corre inteiro (6,5 s); só depois fica parado
+  const CLIP = 184; // congela no sorriso (~6,1 s), antes de ele sair de quadro
   const f = still ? 9999 : frame;
   // Sincronizado com o clipe: ele "escreve" no relógio de ~0,8 s a ~5,6 s e começa a sorrir aos ~6,0 s (frame 180)
   const enter = spring({frame: f - 14, fps, config: {damping: 15, stiffness: 120}});
