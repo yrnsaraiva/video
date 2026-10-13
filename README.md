@@ -1,11 +1,13 @@
 # RUNWITHBROTO · carrossel de Instagram (Remotion)
 
 10 slides em **1080×1350 (4:5)**, prontos a publicar em `carousel/slide-1.jpg … slide-10.jpg`:
-capa (pergunta à IA) → 8 factos → convite final.
+capa (conversa com a IA, em vídeo `slide-1.mp4` + imagem `slide-1.jpg`) → 8 factos → convite final.
 
 ```bash
 npm install
 npm run dev                                   # Remotion Studio: composição "Carousel" (muda o "index" 0–9)
+# vídeo da capa (conversa com a IA, 9 s, sem som):
+npx remotion render CoverVideo carousel/slide-1.mp4 --codec=h264 --pixel-format=yuv420p --crf=18
 # renderizar um slide (index 0 = capa … 9 = fecho):
 npx remotion still Carousel carousel/slide-1.jpg --props='{"index":0}' --image-format=jpeg --jpeg-quality=95
 ```

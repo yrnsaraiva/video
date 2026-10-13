@@ -1,5 +1,5 @@
 import React from "react";
-import {AbsoluteFill, Img, staticFile} from "remotion";
+import {AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
 import {BRAND, INK, INTER, OSWALD} from "./theme";
 import {FACTS} from "./facts";
 import {FactSlide, H, HANDLE, SLIDES, W} from "./carousel";
@@ -7,14 +7,18 @@ import {FactSlide, H, HANDLE, SLIDES, W} from "./carousel";
 const PAD = 64;
 const TOTAL = SLIDES.length;
 
-const Sparkle: React.FC<{size: number}> = ({size}) => (
-  <svg width={size} height={size} viewBox="0 0 100 100">
+// Paleta original do Gemini
+const G_BLUE = "#4285f4", G_PURPLE = "#9b72cb", G_RED = "#d96570";
+const G_GRAD = `linear-gradient(90deg, ${G_BLUE} 0%, ${G_PURPLE} 55%, ${G_RED} 100%)`;
+
+const Sparkle: React.FC<{size: number; rotate?: number}> = ({size, rotate = 0}) => (
+  <svg width={size} height={size} viewBox="0 0 100 100" style={{transform: `rotate(${rotate}deg)`}}>
     <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="#ff5a4d" /><stop offset=".5" stopColor={BRAND} /><stop offset="1" stopColor="#3b82f6" />
+      <linearGradient id="gem" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stopColor={G_BLUE} /><stop offset=".55" stopColor={G_PURPLE} /><stop offset="1" stopColor={G_RED} />
       </linearGradient>
     </defs>
-    <path d="M50 0 C54 30 70 46 100 50 C70 54 54 70 50 100 C46 70 30 54 0 50 C30 46 46 30 50 0Z" fill="url(#g)" />
+    <path d="M50 0 C54 30 70 46 100 50 C70 54 54 70 50 100 C46 70 30 54 0 50 C30 46 46 30 50 0Z" fill="url(#gem)" />
   </svg>
 );
 
@@ -44,29 +48,77 @@ const Chrome: React.FC<{index: number; accent?: string}> = ({index, accent = BRA
   );
 };
 
-const Cover: React.FC<{prompt: string; photo: string; pos: string}> = ({prompt, photo, pos}) => {
-  const parts = prompt.split(/(Gemini,|factos mais interessantes|RUNWITHBROTO)/);
+const CAPTION = (n: number): {t: string; hl?: boolean}[] => [
+  {t: "Aqui estão "}, {t: `${n} factos`, hl: true}, {t: " sobre o "}, {t: "RUNWITHBROTO", hl: true}, {t: ". Desliza para descobrir."},
+];
+const sliceSegs = (segs: {t: string; hl?: boolean}[], n: number) => {
+  const out: {t: string; hl?: boolean}[] = [];
+  let left = n;
+  for (const g of segs) { if (left <= 0) break; out.push({t: g.t.slice(0, left), hl: g.hl}); left -= g.t.length; }
+  return out;
+};
+
+/** Capa: conversa com a IA (pergunta → a pensar → resposta). `still` mostra o estado final. */
+const CoverChat: React.FC<{prompt: string; photo: string; pos: string; still?: boolean}> = ({prompt, photo, pos, still}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const f = still ? 9999 : frame;
+  const enter = spring({frame: f, fps, config: {damping: 15, stiffness: 120}});
+  const typed = Math.floor(interpolate(f, [16, 92], [0, prompt.length], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
+  const sent = f >= 98;
+  const press = interpolate(f, [98, 103, 112], [1, 0.86, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const pulse = !sent && f > 80 ? 1 + 0.08 * Math.sin((f - 80) * 0.5) : 1;
+  const ring = interpolate(f, [98, 118], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const caret = !sent && typed < prompt.length && Math.floor(f / 10) % 2 === 0;
+  const think = f >= 112 && f < 140;
+  const respIn = interpolate(f, [112, 124], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const caption = CAPTION(FACTS.length);
+  const capLen = caption.reduce((n, g) => n + g.t.length, 0);
+  const capTyped = Math.floor(interpolate(f, [140, 214], [0, capLen], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
+  const zoom = still ? 1.06 : interpolate(frame, [0, 270], [1, 1.06], {extrapolateRight: "clamp"});
+  const parts = prompt.slice(0, still ? prompt.length : typed).split(/(Gemini,|factos mais interessantes|RUNWITHBROTO)/);
   return (
     <AbsoluteFill style={{background: INK}}>
-      <Img src={staticFile(photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: pos}} />
-      <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0.55) 0%, rgba(11,11,11,0.05) 38%, rgba(11,11,11,0.15) 55%, rgba(11,11,11,0.92) 100%)"}} />
-      <div style={{position: "absolute", left: PAD, right: PAD, top: 150, background: "rgba(11,11,11,0.94)", borderRadius: 64, padding: "52px 52px 44px",
-        boxShadow: "0 0 0 3px rgba(255,255,255,0.16), 0 0 80px rgba(250,187,0,0.28)"}}>
-        <div style={{fontFamily: INTER, fontWeight: 500, fontSize: 56, lineHeight: 1.25, color: "#e8e8e8"}}>
-          {parts.map((p, i) => p === "Gemini," || p === "factos mais interessantes" || p === "RUNWITHBROTO"
-            ? <b key={i} style={{fontWeight: 700, color: p === "RUNWITHBROTO" ? BRAND : "#fff"}}>{p}</b>
-            : <span key={i}>{p}</span>)}
-        </div>
-        <div style={{display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 28}}>
-          <Sparkle size={64} />
-          <div style={{width: 88, height: 88, borderRadius: 44, background: BRAND, display: "grid", placeItems: "center"}}>
-            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke={INK} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+      <AbsoluteFill style={{transform: `scale(${zoom})`}}>
+        <Img src={staticFile(photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: pos}} />
+      </AbsoluteFill>
+      <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0.9) 0%, rgba(11,11,11,0.84) 40%, rgba(11,11,11,0.6) 55%, rgba(11,11,11,0.06) 72%, rgba(11,11,11,0.7) 100%)"}} />
+
+      {/* a pergunta */}
+      <div style={{position: "absolute", left: PAD, right: PAD, top: 150, opacity: enter, transform: `translateY(${(1 - enter) * -60}px)`}}>
+        <div style={{background: "rgba(14,14,16,0.96)", borderRadius: 64, padding: "50px 52px 42px", minHeight: 330,
+          boxShadow: "0 0 0 2px rgba(255,255,255,0.16), 0 0 70px rgba(66,133,244,0.28)"}}>
+          <div style={{fontFamily: INTER, fontWeight: 500, fontSize: 56, lineHeight: 1.25, color: "#dcdcde", minHeight: 210}}>
+            {parts.map((p, i) => p === "Gemini," || p === "factos mais interessantes" || p === "RUNWITHBROTO"
+              ? <b key={i} style={{fontWeight: 700, color: "#fff"}}>{p}</b> : <span key={i}>{p}</span>)}
+            {caret && <span style={{display: "inline-block", width: 5, height: 56, background: G_BLUE, marginLeft: 6, verticalAlign: "middle"}} />}
+          </div>
+          <div style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+            <Sparkle size={60} />
+            <div style={{position: "relative"}}>
+              <div style={{position: "absolute", inset: 0, borderRadius: 44, border: `4px solid ${G_BLUE}`, opacity: sent && ring < 1 ? 1 - ring : 0, transform: `scale(${1 + ring * 1.7})`}} />
+              <div style={{width: 88, height: 88, borderRadius: 44, background: G_BLUE, display: "grid", placeItems: "center", transform: `scale(${sent ? press : pulse})`}}>
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div style={{position: "absolute", left: PAD, right: PAD, bottom: 150}}>
-        <div style={{fontFamily: OSWALD, fontWeight: 700, fontSize: 250, lineHeight: 0.95, color: BRAND, textTransform: "uppercase"}}>{FACTS.length} factos</div>
-        <div style={{fontFamily: OSWALD, fontWeight: 500, fontSize: 64, letterSpacing: 4, color: "#fff", textTransform: "uppercase", marginTop: 6}}>sobre o RUNWITHBROTO</div>
+
+      {/* a resposta */}
+      <div style={{position: "absolute", left: PAD + 8, right: PAD, top: 566, display: "flex", gap: 26, alignItems: "flex-start", opacity: respIn, transform: `translateY(${(1 - respIn) * 24}px)`}}>
+        <div style={{flex: "none", marginTop: 8}}><Sparkle size={64} rotate={think ? f * 9 : 0} /></div>
+        {think ? (
+          <div style={{display: "flex", gap: 16, marginTop: 30}}>
+            {[0, 1, 2].map((i) => <div key={i} style={{width: 20, height: 20, borderRadius: 10, background: G_GRAD, transform: `translateY(${-Math.abs(Math.sin((f - i * 4) * 0.35)) * 20}px)`}} />)}
+          </div>
+        ) : (
+          <div style={{fontFamily: INTER, fontWeight: 500, fontSize: 54, lineHeight: 1.3, color: "#ececee"}}>
+            {sliceSegs(caption, still ? capLen : capTyped).map((g, i) => g.hl
+              ? <b key={i} style={{fontWeight: 700, backgroundImage: G_GRAD, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent"}}>{g.t}</b>
+              : <span key={i}>{g.t}</span>)}
+          </div>
+        )}
       </div>
     </AbsoluteFill>
   );
@@ -81,6 +133,59 @@ const Moon: React.FC = () => (
   </svg>
 );
 
+/** Ilustração: várias partidas históricas → uma só chegada (Fortaleza). */
+const bez = (p: number[][], t: number) => {
+  const [a, b, c, d] = p, u = 1 - t;
+  return [0, 1].map((k) => u * u * u * a[k] + 3 * u * u * t * b[k] + 3 * u * t * t * c[k] + t * t * t * d[k]);
+};
+const HybridDiagram: React.FC = () => {
+  const ROUTES = [
+    {color: BRAND, n: "1", pts: [[150, 150], [150, 262], [330, 292], [452, 330]], label: ["Estátua", "Eduardo Mondlane"], x: 150},
+    {color: "#ffffff", n: "2", pts: [[476, 132], [476, 205], [476, 268], [476, 326]], label: ["Praça", "da OMM"], x: 476},
+    {color: "#ff8a1f", n: "3", pts: [[802, 150], [802, 262], [622, 292], [500, 330]], label: ["Destacamento", "Feminino"], x: 802},
+  ];
+  return (
+    <svg width="952" height="500" viewBox="0 0 952 500" style={{position: "absolute", left: PAD, top: 118}}>
+      <defs>
+        <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+          <path d="M64 0H0V64" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="2" />
+        </pattern>
+      </defs>
+      <rect x="0" y="0" width="952" height="500" rx="36" fill="rgba(11,11,11,0.5)" />
+      <rect x="0" y="0" width="952" height="500" rx="36" fill="url(#grid)" />
+      <rect x="1" y="1" width="950" height="498" rx="35" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="2" />
+      {ROUTES.map((r, i) => {
+        const [a, b, c, d] = r.pts;
+        const path = `M${a[0]},${a[1]} C${b[0]},${b[1]} ${c[0]},${c[1]} ${d[0]},${d[1]}`;
+        const dots = [0.3, 0.58, 0.82].map((t) => bez(r.pts, t));
+        return (
+          <g key={i}>
+            <path d={path} fill="none" stroke={r.color} strokeWidth="14" opacity="0.14" strokeLinecap="round" />
+            <path d={path} fill="none" stroke={r.color} strokeWidth="6" strokeLinecap="round" strokeDasharray="1 15" />
+            {dots.map(([x, y], k) => <circle key={k} cx={x} cy={y} r={k === 1 ? 11 : 8} fill={r.color} opacity={k === 1 ? 1 : 0.7} />)}
+            <circle cx={a[0]} cy={a[1] - 12} r="24" fill={r.color} />
+            <text x={a[0]} y={a[1] - 1} textAnchor="middle" fontFamily={OSWALD} fontWeight={700} fontSize="32" fill={INK}>{r.n}</text>
+            <text x={r.x} y={50} textAnchor="middle" fontFamily={OSWALD} fontWeight={500} fontSize="29" letterSpacing="2" fill="#fff">{r.label[0].toUpperCase()}</text>
+            <text x={r.x} y={80} textAnchor="middle" fontFamily={OSWALD} fontWeight={500} fontSize="29" letterSpacing="2" fill="#fff">{r.label[1].toUpperCase()}</text>
+          </g>
+        );
+      })}
+      {/* a fortaleza */}
+      <g transform="translate(416 332)">
+        <line x1="60" y1="-34" x2="60" y2="6" stroke="#fff" strokeWidth="4" strokeLinecap="round" />
+        <polygon points="60,-34 96,-22 60,-10" fill="#fff" />
+        {[0, 26, 52, 78, 104].map((x) => <rect key={x} x={x} y="4" width="16" height="18" fill={BRAND} />)}
+        <rect x="0" y="20" width="120" height="62" rx="4" fill={BRAND} />
+        <path d="M46 82 V56 a14 14 0 0 1 28 0 V82 Z" fill={INK} />
+      </g>
+      <rect x="356" y="428" width="240" height="46" rx="10" fill={BRAND} />
+      <text x="476" y="462" textAnchor="middle" fontFamily={OSWALD} fontWeight={700} fontSize="32" letterSpacing="5" fill={INK}>FORTALEZA</text>
+      <text x="40" y="468" fontFamily={OSWALD} fontWeight={500} fontSize="28" letterSpacing="5" fill="#fff" opacity="0.85">3 PARTIDAS</text>
+      <text x="912" y="468" textAnchor="end" fontFamily={OSWALD} fontWeight={500} fontSize="28" letterSpacing="5" fill="#fff" opacity="0.85">1 CHEGADA</text>
+    </svg>
+  );
+};
+
 const Fact: React.FC<{s: FactSlide}> = ({s}) => {
   const lines = s.title.split("\n");
   const stat = s.stat;
@@ -89,6 +194,8 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
       <Img src={staticFile(s.photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos, transform: s.shift ? `translateY(${-s.shift}px)` : undefined, WebkitMaskImage: s.shift ? `linear-gradient(180deg, #000 ${1350 - s.shift - 200}px, transparent ${1350 - s.shift}px)` : undefined, filter: s.cut ? "blur(4px) brightness(0.8)" : s.night ? "brightness(0.55) saturate(0.7) contrast(1.1)" : undefined}} />
       {s.night && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(8,24,70,0.78) 0%, rgba(14,40,110,0.45) 100%)", mixBlendMode: "multiply"}} />}
       {s.night && <Moon />}
+      {s.diagram && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0.78) 0%, rgba(11,11,11,0.25) 50%, rgba(11,11,11,0) 100%)"}} />}
+      {s.diagram && <HybridDiagram />}
       {s.cut && (
         <div style={{position: "absolute", left: 0, right: 0, top: 120, textAlign: "center", fontFamily: OSWALD, fontWeight: 700, fontSize: 760, lineHeight: 1, color: s.accent, opacity: 0.95}}>
           {s.kicker.slice(-2)}
@@ -109,7 +216,7 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
           return (
             <div key={k} style={{position: "relative", display: "block", width: "fit-content"}}>
               {hl && <div style={{position: "absolute", inset: "2px -16px 0 -16px", background: s.accent}} />}
-              <div style={{position: "relative", fontFamily: OSWALD, fontWeight: 700, fontSize: stat ? 100 : 112, lineHeight: 1.18, textTransform: "uppercase", color: hl ? INK : "#fff"}}>{l}</div>
+              <div style={{position: "relative", fontFamily: OSWALD, fontWeight: 700, fontSize: stat ? 100 : s.diagram ? 100 : 112, lineHeight: 1.18, textTransform: "uppercase", color: hl ? INK : "#fff"}}>{l}</div>
             </div>
           );
         })}
@@ -142,10 +249,22 @@ export const Carousel: React.FC<{index: number}> = ({index}) => {
   const accent = s.kind === "fact" ? s.accent : BRAND;
   return (
     <AbsoluteFill style={{width: W, height: H, background: INK}}>
-      {s.kind === "cover" && <Cover prompt={s.prompt} photo={s.photo} pos={s.pos} />}
+      {s.kind === "cover" && <CoverChat prompt={s.prompt} photo={s.photo} pos={s.pos} still />}
       {s.kind === "fact" && <Fact s={s} />}
       {s.kind === "cta" && <Cta />}
       <Chrome index={index} accent={accent} />
+    </AbsoluteFill>
+  );
+};
+
+/** Capa em vídeo (conversa com a IA) para o primeiro slide do carrossel. */
+export const CoverVideo: React.FC = () => {
+  const s = SLIDES[0];
+  if (s.kind !== "cover") return null;
+  return (
+    <AbsoluteFill style={{width: W, height: H, background: INK}}>
+      <CoverChat prompt={s.prompt} photo={s.photo} pos={s.pos} />
+      <Chrome index={0} />
     </AbsoluteFill>
   );
 };
