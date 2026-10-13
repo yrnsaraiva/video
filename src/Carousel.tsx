@@ -1,5 +1,5 @@
 import React from "react";
-import {AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
+import {AbsoluteFill, Freeze, Img, OffthreadVideo, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
 import {BRAND, INK, INTER, OSWALD} from "./theme";
 import {FACTS} from "./facts";
 import {FactSlide, H, HANDLE, SLIDES, W} from "./carousel";
@@ -62,7 +62,8 @@ const sliceSegs = (segs: {t: string; hl?: boolean}[], n: number) => {
 const CoverChat: React.FC<{prompt: string; photo: string; pos: string; still?: boolean}> = ({prompt, photo, pos, still}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const f = still ? 9999 : frame;
+  const CLIP = 130; // o vídeo dele corre até aos ~4,3 s (ele ao centro); depois fica parado
+  const f = still ? 9999 : frame - 64; // a conversa começa aos 64 frames (~2 s), com ele a mexer no relógio
   const enter = spring({frame: f, fps, config: {damping: 15, stiffness: 120}});
   const typed = Math.floor(interpolate(f, [16, 92], [0, prompt.length], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
   const sent = f >= 98;
@@ -75,14 +76,22 @@ const CoverChat: React.FC<{prompt: string; photo: string; pos: string; still?: b
   const caption = CAPTION(FACTS.length);
   const capLen = caption.reduce((n, g) => n + g.t.length, 0);
   const capTyped = Math.floor(interpolate(f, [140, 214], [0, capLen], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
-  const zoom = still ? 1.06 : interpolate(frame, [0, 270], [1, 1.06], {extrapolateRight: "clamp"});
+  const zoom = still ? 1.05 : interpolate(frame, [0, 300], [1, 1.05], {extrapolateRight: "clamp"});
+  const shade = still ? 1 : interpolate(f, [0, 36], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
   const parts = prompt.slice(0, still ? prompt.length : typed).split(/(Gemini,|factos mais interessantes|RUNWITHBROTO)/);
   return (
     <AbsoluteFill style={{background: INK}}>
       <AbsoluteFill style={{transform: `scale(${zoom})`}}>
-        <Img src={staticFile(photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: pos}} />
+        {still ? (
+          <Img src={staticFile(photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: pos}} />
+        ) : (
+          <Freeze frame={Math.min(frame, CLIP)}>
+            <OffthreadVideo src={staticFile("videos/01.mp4")} muted style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: pos}} />
+          </Freeze>
+        )}
       </AbsoluteFill>
-      <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0.9) 0%, rgba(11,11,11,0.84) 40%, rgba(11,11,11,0.6) 55%, rgba(11,11,11,0.06) 72%, rgba(11,11,11,0.7) 100%)"}} />
+      <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0.5) 0%, rgba(11,11,11,0) 26%, rgba(11,11,11,0) 70%, rgba(11,11,11,0.6) 100%)"}} />
+      <AbsoluteFill style={{opacity: shade, background: "linear-gradient(180deg, rgba(11,11,11,0.9) 0%, rgba(11,11,11,0.84) 40%, rgba(11,11,11,0.6) 55%, rgba(11,11,11,0.06) 72%, rgba(11,11,11,0) 100%)"}} />
 
       {/* a pergunta */}
       <div style={{position: "absolute", left: PAD, right: PAD, top: 150, opacity: enter, transform: `translateY(${(1 - enter) * -60}px)`}}>
@@ -133,11 +142,7 @@ const Moon: React.FC = () => (
   </svg>
 );
 
-/** Ilustração: várias partidas históricas → uma só chegada (Fortaleza). */
-const bez = (p: number[][], t: number) => {
-  const [a, b, c, d] = p, u = 1 - t;
-  return [0, 1].map((k) => u * u * u * a[k] + 3 * u * u * t * b[k] + 3 * u * t * t * c[k] + t * t * t * d[k]);
-};
+/** Ilustração: várias partidas históricas → uma só chegada (Fortaleza). Versão limpa. */
 const HybridDiagram: React.FC = () => {
   const ROUTES = [
     {color: BRAND, n: "1", pts: [[150, 150], [150, 262], [330, 292], [452, 330]], label: ["Estátua", "Eduardo Mondlane"], x: 150},
@@ -145,32 +150,20 @@ const HybridDiagram: React.FC = () => {
     {color: "#ff8a1f", n: "3", pts: [[802, 150], [802, 262], [622, 292], [500, 330]], label: ["Destacamento", "Feminino"], x: 802},
   ];
   return (
-    <svg width="952" height="500" viewBox="0 0 952 500" style={{position: "absolute", left: PAD, top: 118}}>
-      <defs>
-        <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
-          <path d="M64 0H0V64" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="2" />
-        </pattern>
-      </defs>
-      <rect x="0" y="0" width="952" height="500" rx="36" fill="rgba(11,11,11,0.5)" />
-      <rect x="0" y="0" width="952" height="500" rx="36" fill="url(#grid)" />
-      <rect x="1" y="1" width="950" height="498" rx="35" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="2" />
+    <svg width="952" height="470" viewBox="0 0 952 470" style={{position: "absolute", left: PAD, top: 128, filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.7))"}}>
       {ROUTES.map((r, i) => {
         const [a, b, c, d] = r.pts;
         const path = `M${a[0]},${a[1]} C${b[0]},${b[1]} ${c[0]},${c[1]} ${d[0]},${d[1]}`;
-        const dots = [0.3, 0.58, 0.82].map((t) => bez(r.pts, t));
         return (
           <g key={i}>
-            <path d={path} fill="none" stroke={r.color} strokeWidth="14" opacity="0.14" strokeLinecap="round" />
             <path d={path} fill="none" stroke={r.color} strokeWidth="6" strokeLinecap="round" strokeDasharray="1 15" />
-            {dots.map(([x, y], k) => <circle key={k} cx={x} cy={y} r={k === 1 ? 11 : 8} fill={r.color} opacity={k === 1 ? 1 : 0.7} />)}
             <circle cx={a[0]} cy={a[1] - 12} r="24" fill={r.color} />
             <text x={a[0]} y={a[1] - 1} textAnchor="middle" fontFamily={OSWALD} fontWeight={700} fontSize="32" fill={INK}>{r.n}</text>
-            <text x={r.x} y={50} textAnchor="middle" fontFamily={OSWALD} fontWeight={500} fontSize="29" letterSpacing="2" fill="#fff">{r.label[0].toUpperCase()}</text>
-            <text x={r.x} y={80} textAnchor="middle" fontFamily={OSWALD} fontWeight={500} fontSize="29" letterSpacing="2" fill="#fff">{r.label[1].toUpperCase()}</text>
+            <text x={r.x} y={48} textAnchor="middle" fontFamily={OSWALD} fontWeight={500} fontSize="28" letterSpacing="3" fill="#fff">{r.label[0].toUpperCase()}</text>
+            <text x={r.x} y={80} textAnchor="middle" fontFamily={OSWALD} fontWeight={500} fontSize="28" letterSpacing="3" fill="#fff">{r.label[1].toUpperCase()}</text>
           </g>
         );
       })}
-      {/* a fortaleza */}
       <g transform="translate(416 332)">
         <line x1="60" y1="-34" x2="60" y2="6" stroke="#fff" strokeWidth="4" strokeLinecap="round" />
         <polygon points="60,-34 96,-22 60,-10" fill="#fff" />
@@ -178,10 +171,7 @@ const HybridDiagram: React.FC = () => {
         <rect x="0" y="20" width="120" height="62" rx="4" fill={BRAND} />
         <path d="M46 82 V56 a14 14 0 0 1 28 0 V82 Z" fill={INK} />
       </g>
-      <rect x="356" y="428" width="240" height="46" rx="10" fill={BRAND} />
-      <text x="476" y="462" textAnchor="middle" fontFamily={OSWALD} fontWeight={700} fontSize="32" letterSpacing="5" fill={INK}>FORTALEZA</text>
-      <text x="40" y="468" fontFamily={OSWALD} fontWeight={500} fontSize="28" letterSpacing="5" fill="#fff" opacity="0.85">3 PARTIDAS</text>
-      <text x="912" y="468" textAnchor="end" fontFamily={OSWALD} fontWeight={500} fontSize="28" letterSpacing="5" fill="#fff" opacity="0.85">1 CHEGADA</text>
+      <text x="476" y="450" textAnchor="middle" fontFamily={OSWALD} fontWeight={700} fontSize="36" letterSpacing="8" fill="#fff">FORTALEZA</text>
     </svg>
   );
 };
@@ -194,7 +184,7 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
       <Img src={staticFile(s.photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos, transform: s.shift ? `translateY(${-s.shift}px)` : undefined, WebkitMaskImage: s.shift ? `linear-gradient(180deg, #000 ${1350 - s.shift - 200}px, transparent ${1350 - s.shift}px)` : undefined, filter: s.cut ? "blur(4px) brightness(0.8)" : s.night ? "brightness(0.55) saturate(0.7) contrast(1.1)" : undefined}} />
       {s.night && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(8,24,70,0.78) 0%, rgba(14,40,110,0.45) 100%)", mixBlendMode: "multiply"}} />}
       {s.night && <Moon />}
-      {s.diagram && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0.78) 0%, rgba(11,11,11,0.25) 50%, rgba(11,11,11,0) 100%)"}} />}
+      {s.diagram && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0.6) 0%, rgba(11,11,11,0.2) 45%, rgba(11,11,11,0) 100%)"}} />}
       {s.diagram && <HybridDiagram />}
       {s.cut && (
         <div style={{position: "absolute", left: 0, right: 0, top: 120, textAlign: "center", fontFamily: OSWALD, fontWeight: 700, fontSize: 760, lineHeight: 1, color: s.accent, opacity: 0.95}}>
