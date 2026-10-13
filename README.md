@@ -1,18 +1,21 @@
 # RUNWITHBROTO · motion video (Remotion)
 
-Vídeo vertical 1080x1920 · 30 fps · ~28 s: frame de "pergunta à IA" → 6 factos → fecho com logo.
+Vídeo vertical 1080x1920 · 30 fps · 33 s: pergunta à IA → 6 factos animados → fecho com logo.
 
 ```bash
-cd video && npm install
-npm run dev      # Remotion Studio (pré-visualização)
+npm install
+npm run dev      # Remotion Studio (pré-visualização ao vivo)
 npm run build    # gera out/rwb-facts.mp4
 ```
 
-## Fotos
-Fotos em `public/photos/01…08.jpg` (já com as fotos reais do clube). Ordem: 01 abertura, 02–07 factos, 08 fecho.
-`videos/01.mp4` é o fundo da pergunta inicial (vídeo; `01.jpg` já não é usado); `08.jpg` o fundo do fecho; 02–07 são os 6 factos. Fotos do álbum Coffee Party:
-https://coresvivasclientesmoz.pixieset.com/runwithbrotocoffeparty/
+## Editar
+- **Textos e elementos de cada facto:** `src/facts.ts` (pergunta, título, texto, foto, duração `FACT_LEN`).
+  Elementos opcionais por facto: `stat` (contador `{to: 2500, prefix: "+"}` ou carimbo `{text: "25 JUN"}`),
+  `route` (rota animada A→B) e `badge` (selo giratório).
+- **Fotos/vídeos:** `public/photos/02…07.jpg` (cenas dos factos), `public/videos/01.mp4` (fundo da abertura),
+  `public/videos/07.mp4` (fundo do facto 6). Vídeos devem ser H.264/SDR (converter HEVC/HDR com ffmpeg antes).
+- **Transições entre cenas:** `KINDS` em `src/RWBFacts.tsx` (`wipe`, `stripes`, `iris`, `slats`); código em `src/Transitions.tsx`.
+- **Elementos (faixa, selo, contador, faíscas, barra de progresso):** `src/Elements.tsx`.
+- **Texto da faixa deslizante:** constante `TICKER` em `src/RWBFacts.tsx`.
 
-## Textos / duração
-Tudo em `src/facts.ts` (pergunta, factos, duração das cenas). Animações em `src/RWBFacts.tsx`.
 Marca: amarelo `#fabb00`, tinta `#0b0b0b`, Oswald + Inter (fontes locais em `public/fonts`).
