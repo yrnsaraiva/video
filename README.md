@@ -9,14 +9,14 @@ npm run build    # gera out/rwb-facts.mp4
 ```
 
 ## Editar
-- **Textos e elementos de cada facto:** `src/facts.ts` (pergunta, título, texto, foto, duração `FACT_LEN`).
-  Elementos opcionais por facto: `stat` (contador `{to: 2500, prefix: "+"}` ou carimbo `{text: "25 JUN"}`),
-  `route` (rota animada A→B) e `badge` (selo giratório).
-- **Efeito de profundidade:** `cut: "photos/NN-cut.png"` num facto (PNG recortado, do mesmo tamanho da foto) põe o número gigante atrás do sujeito. Os recortes foram feitos localmente com `@imgly/background-removal-node`.
-- **Fotos/vídeos:** `public/photos/02…07.jpg` (cenas dos factos), `public/videos/01.mp4` (fundo da abertura),
-  `public/videos/07.mp4` (fundo do facto 6). Vídeos devem ser H.264/SDR (converter HEVC/HDR com ffmpeg antes).
-- **Transições entre cenas:** `KINDS` em `src/RWBFacts.tsx` (`wipe`, `stripes`, `iris`, `slats`); código em `src/Transitions.tsx`.
-- **Elementos (faixa, selo, contador, faíscas, barra de progresso):** `src/Elements.tsx`.
-- **Texto da faixa deslizante:** constante `TICKER` em `src/RWBFacts.tsx`.
+- **Cada facto é um "capítulo"** em `src/facts.ts`: texto (`title`, `body`), rótulo (`chapter`), cor (`accent`),
+  animação do título (`anim`: `slideUp`, `words`, `wipeX`, `slideX`, `zoom`, `drop`) e elemento próprio (`deco`: `pack`, `dots`, `sun`, `steam`).
+  Opcionais: `stat` (contador `{to: 2500, prefix: "+"}` ou carimbo `{text: "25 JUN"}`), `route` (rota A→B), `badge` (selo giratório),
+  `cut` (PNG recortado do mesmo tamanho da foto: o número gigante fica atrás do sujeito).
+- **Transições feitas à medida** (`src/Transitions.tsx`, lista `KINDS` em `src/RWBFacts.tsx`): `sparkle` (estrela da IA), `track` (raias de pista),
+  `dots` (multidão), `burst` (explosão rosa), `sunrise` (sol), `coffee` (café), `checker` (linha de meta).
+- **Fotos/vídeos:** `public/photos/02…07.jpg`, `public/videos/01.mp4` (abertura), `public/videos/07.mp4` (facto 6). Vídeos em H.264/SDR
+  (converter HEVC/HDR com ffmpeg antes). Recortes: `@imgly/background-removal-node` (offline) ou `remove_background` do Higgsfield.
+- **Elementos** (faixa, selo, contador, grelha de pontos, sol, vapor): `src/Elements.tsx`. Texto da faixa: constante `TICKER` em `src/RWBFacts.tsx`.
 
 Marca: amarelo `#fabb00`, tinta `#0b0b0b`, Oswald + Inter (fontes locais em `public/fonts`).

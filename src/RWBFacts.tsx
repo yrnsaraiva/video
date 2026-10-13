@@ -2,7 +2,7 @@ import React from "react";
 import {AbsoluteFill, Img, OffthreadVideo, Sequence, interpolate, random, spring, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
 import {BRAND, INK, INTER, OSWALD, clamp, inOut, outExpo} from "./theme";
 import {FACTS, FACT_LEN, INTRO, OUTRO, PROMPT} from "./facts";
-import {Badge, Body, Ghost, Photo, Punch, Route, Sparks, Stat, StoryBar, Ticker, TitleLine, Vignette} from "./Elements";
+import {Badge, Body, DotMatrix, Ghost, Pack, Photo, Punch, Route, Sparks, Stat, Steam, StoryBar, Sun, Ticker, TitleLine, Vignette} from "./Elements";
 import {T_LEN, TKind, Transition} from "./Transitions";
 
 const TICKER = "RUNWITHBROTO  •  WE RUN TOGETHER  •  WE GROW TOGETHER  •  ";
@@ -87,8 +87,10 @@ const Intro: React.FC = () => {
 // ───────────────────────── Cena de facto ─────────────────────────
 const FactScene: React.FC<{i: number}> = ({i}) => {
   const fact = FACTS[i];
+  const accent = fact.accent ?? BRAND;
   const lines = fact.title.split("\n");
   const size = fact.stat ? 104 : 112;
+  const sunScene = fact.deco === "sun";
   return (
     <AbsoluteFill style={{background: INK}}>
       <Punch>
@@ -101,8 +103,9 @@ const FactScene: React.FC<{i: number}> = ({i}) => {
           <Photo src={fact.photo} len={FACT_LEN} dir={i % 2 === 0 ? 1 : -1} dark={fact.cut ? 0.62 : 0.4} pos={fact.pos} blur={fact.cut ? 5 : 0} />
         )}
       </Punch>
-      {/* Profundidade: o número fica entre o fundo e o sujeito recortado */}
-      <Ghost n={i + 1} behind={!!fact.cut} />
+      {sunScene && <Sun />}
+      {/* Profundidade: o número (ou o sol) fica entre o fundo e o sujeito recortado */}
+      {!sunScene && <Ghost n={i + 1} behind={!!fact.cut} accent={accent} />}
       {fact.cut && (
         <Punch>
           <Photo src={fact.cut} len={FACT_LEN} dir={i % 2 === 0 ? 1 : -1} pos={fact.pos} overlay={false} />
@@ -110,31 +113,38 @@ const FactScene: React.FC<{i: number}> = ({i}) => {
       )}
       {fact.cut && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(11,11,11,0) 45%, rgba(11,11,11,0.78) 78%, rgba(11,11,11,0.9) 100%)"}} />}
       <Vignette />
-      <Sparks seed={i} />
+      {fact.deco === "steam" && <Steam />}
+      <Sparks seed={i} color={accent} />
       {fact.route && <Route from={fact.route[0]} to={fact.route[1]} />}
-      {fact.badge && <Badge center={fact.badge.center} ring={fact.badge.ring} />}
+      {fact.badge && <Badge center={fact.badge.center} ring={fact.badge.ring} accent={accent} />}
+      {fact.deco === "pack" && <Pack />}
+      {fact.deco === "dots" && <DotMatrix total={84} />}
       <AbsoluteFill style={{justifyContent: "flex-end", padding: "0 70px 250px"}}>
-        <div style={{alignSelf: "flex-start"}}><Kicker text={fact.kicker} /></div>
-        {fact.stat && <Stat {...fact.stat} />}
-        {lines.map((l, k) => <TitleLine key={k} text={l} k={k} hl={k === lines.length - 1} size={size} />)}
+        <div style={{alignSelf: "flex-start"}}><Kicker text={fact.kicker} chapter={fact.chapter} accent={accent} /></div>
+        {fact.stat && <Stat {...fact.stat} accent={accent} />}
+        {lines.map((l, k) => <TitleLine key={k} text={l} k={k} hl={k === lines.length - 1} size={size} anim={fact.anim} accent={accent} />)}
         <Body text={fact.body} />
       </AbsoluteFill>
-      <Ticker text={TICKER} y={1795} dir={i % 2 === 0 ? 1 : -1} />
-      <StoryBar index={i} total={FACTS.length} len={FACT_LEN} />
+      <Ticker text={TICKER} y={1795} dir={i % 2 === 0 ? 1 : -1} bg={accent} />
+      <StoryBar index={i} total={FACTS.length} len={FACT_LEN} accent={accent} />
       <Img src={staticFile("wordmark-yellow.png")} style={{position: "absolute", left: 70, top: 78, height: 60}} />
     </AbsoluteFill>
   );
 };
 
-const Kicker: React.FC<{text: string}> = ({text}) => {
+const Kicker: React.FC<{text: string; chapter: string; accent: string}> = ({text, chapter, accent}) => {
   const f = useCurrentFrame();
   const {fps} = useVideoConfig();
   const k = spring({frame: f - 4, fps, config: {damping: 14}});
+  const c = interpolate(f, [12, 30], [0, 1], {...clamp, easing: outExpo});
   const bar = interpolate(f, [6, 26], [0, 1], {...clamp, easing: outExpo});
   return (
     <div style={{marginBottom: 26}}>
-      <div style={{display: "inline-flex", background: BRAND, color: INK, fontFamily: OSWALD, fontWeight: 700, fontSize: 44, letterSpacing: 6, padding: "10px 28px", borderRadius: 10, opacity: k, transform: `translateY(${(1 - k) * 30}px) scale(${0.9 + k * 0.1})`}}>{text}</div>
-      <div style={{height: 10, width: bar * 220, background: BRAND, marginTop: 24}} />
+      <div style={{display: "flex", alignItems: "center", gap: 20}}>
+        <div style={{display: "inline-flex", background: accent, color: INK, fontFamily: OSWALD, fontWeight: 700, fontSize: 44, letterSpacing: 6, padding: "10px 28px", borderRadius: 10, opacity: k, transform: `translateY(${(1 - k) * 30}px) scale(${0.9 + k * 0.1})`}}>{text}</div>
+        <div style={{fontFamily: OSWALD, fontWeight: 500, fontSize: 38, letterSpacing: 8, color: "#fff", opacity: c, transform: `translateX(${(1 - c) * -30}px)`, textShadow: "0 4px 20px rgba(0,0,0,0.6)"}}>{chapter}</div>
+      </div>
+      <div style={{height: 10, width: bar * 220, background: accent, marginTop: 24}} />
     </div>
   );
 };
@@ -157,6 +167,7 @@ const Outro: React.FC = () => {
       </AbsoluteFill>
       <Sparks seed={99} count={34} />
       <Confetti />
+      <FinishTape />
       <AbsoluteFill style={{alignItems: "center", justifyContent: "center", textAlign: "center", padding: 70}}>
         <Img src={staticFile("logo-yellow.png")} style={{width: 780, transform: `scale(${0.5 + logo * 0.5}) rotate(${(1 - logo) * -8}deg)`, opacity: Math.min(1, logo * 2), filter: `drop-shadow(0 0 ${30 + glow * 30}px rgba(250,187,0,0.55))`}} />
         <div style={{marginTop: 60, display: "flex", flexDirection: "column", alignItems: "center"}}>
@@ -190,6 +201,20 @@ const OutLine: React.FC<{text: string; at: number; color: string; hl?: boolean}>
   );
 };
 
+/** Fita de meta: parte-se ao meio e cai quando o fecho começa. */
+const FinishTape: React.FC = () => {
+  const f = useCurrentFrame();
+  const t = Math.max(0, f - 6);
+  if (f > 40) return null;
+  const grav = 0.9 * t * t;
+  const half = (side: 1 | -1) => (
+    <div style={{position: "absolute", top: 930, [side === 1 ? "right" : "left"]: 540, width: 560, height: 64, transformOrigin: side === 1 ? "left center" : "right center",
+      transform: `translate(${side * t * 26}px, ${grav}px) rotate(${side * t * 3.2}deg)`, opacity: interpolate(t, [10, 28], [1, 0], clamp),
+      backgroundImage: `repeating-linear-gradient(-45deg, ${BRAND} 0 28px, ${INK} 28px 56px)`, boxShadow: "0 8px 30px rgba(0,0,0,0.5)"}} />
+  );
+  return <AbsoluteFill style={{pointerEvents: "none"}}>{half(1)}{half(-1)}</AbsoluteFill>;
+};
+
 const Confetti: React.FC = () => {
   const f = useCurrentFrame();
   const start = 6;
@@ -210,7 +235,7 @@ const Confetti: React.FC = () => {
 };
 
 // ───────────────────────── Montagem ─────────────────────────
-const KINDS: TKind[] = ["wipe", "stripes", "iris", "slats", "wipe", "stripes", "iris"];
+const KINDS: TKind[] = ["sparkle", "track", "dots", "burst", "sunrise", "coffee", "checker"];
 
 export const RWBFacts: React.FC = () => (
   <AbsoluteFill style={{background: INK}}>
