@@ -8,6 +8,9 @@ npm install
 npm run dev                                   # Remotion Studio: composição "Carousel" (muda o "index" 0–9)
 # vídeo da capa (conversa com a IA, 9 s, sem som):
 npx remotion render CoverVideo carousel/slide-1.mp4 --codec=h264 --pixel-format=yuv420p --crf=18
+# efeitos sonoros da capa (sintetizados, sincronizados com a animação) e junção ao vídeo:
+python3 tools/make_sfx.py sfx.wav
+ffmpeg -i carousel/slide-1-sem-som.mp4 -i sfx.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k carousel/slide-1.mp4
 # renderizar um slide (index 0 = capa … 9 = fecho):
 npx remotion still Carousel carousel/slide-1.jpg --props='{"index":0}' --image-format=jpeg --jpeg-quality=95
 ```
