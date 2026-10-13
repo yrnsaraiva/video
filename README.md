@@ -1,3 +1,24 @@
+# RUNWITHBROTO · carrossel de Instagram (Remotion)
+
+8 slides em **1080×1350 (4:5)**, prontos a publicar em `carousel/slide-1.jpg … slide-8.jpg`:
+capa (pergunta à IA) → 6 factos → convite final.
+
+```bash
+npm install
+npm run dev                                   # Remotion Studio: composição "Carousel" (muda o "index" 0–7)
+# renderizar um slide (index 0 = capa … 7 = fecho):
+npx remotion still Carousel carousel/slide-1.jpg --props='{"index":0}' --image-format=jpeg --jpeg-quality=95
+```
+
+## Editar o carrossel
+- **Textos dos factos:** `src/facts.ts` (`title`, `body`, `chapter`, `accent`).
+- **Fotos, enquadramento (`pos`), contadores e `HANDLE`:** `src/carousel.ts`. Fotos em `public/photos/`;
+  o recorte (`cut`, PNG do mesmo tamanho da foto) põe o número gigante atrás do sujeito.
+- **Desenho dos slides** (capa, factos, fecho, cabeçalho e rodapé): `src/Carousel.tsx`.
+
+---
+*Abaixo: o projeto anterior, em vídeo (composição `RWBFacts`), mantido no histórico.*
+
 # RUNWITHBROTO · motion video (Remotion)
 
 Vídeo vertical 1080x1920 · 30 fps · 33 s: pergunta à IA → 6 factos animados → fecho com logo.
