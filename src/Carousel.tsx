@@ -37,23 +37,24 @@ const sliceSegs = (segs: {t: string; hl?: boolean}[], n: number) => {
 const CoverChat: React.FC<{prompt: string; photo: string; pos: string; still?: boolean}> = ({prompt, photo, pos, still}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const CLIP = 184; // congela no sorriso (~6,1 s), antes de ele sair de quadro
+  const RATE = 0.8; // o clipe corre a 0,8× para a escrita ficar mais lenta e continuar sincronizada
+  const CLIP = 230; // frame (da composição) em que congela no sorriso, antes de ele sair de quadro
   const f = still ? 9999 : frame;
-  // Sincronizado com o clipe: ele "escreve" no relógio de ~0,8 s a ~5,6 s e começa a sorrir aos ~6,0 s (frame 180)
-  const enter = spring({frame: f - 14, fps, config: {damping: 15, stiffness: 120}});
-  const typed = Math.floor(interpolate(f, [26, 156], [0, prompt.length], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
-  const sent = f >= 160;
-  const press = interpolate(f, [160, 165, 174], [1, 0.86, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
-  const pulse = !sent && f > 142 ? 1 + 0.08 * Math.sin((f - 142) * 0.5) : 1;
-  const ring = interpolate(f, [160, 180], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  // Sincronizado com o clipe a 0,8×: ele "escreve" no relógio de ~1,0 s a ~6,6 s e começa a sorrir aos ~7,5 s (frame 225)
+  const enter = spring({frame: f - 18, fps, config: {damping: 15, stiffness: 120}});
+  const typed = Math.floor(interpolate(f, [30, 199], [0, prompt.length], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
+  const sent = f >= 202;
+  const press = interpolate(f, [202, 208, 218], [1, 0.86, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const pulse = !sent && f > 180 ? 1 + 0.08 * Math.sin((f - 180) * 0.5) : 1;
+  const ring = interpolate(f, [202, 224], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
   const caret = !sent && typed < prompt.length && Math.floor(f / 10) % 2 === 0;
-  const think = f >= 164 && f < 180;
-  const respIn = interpolate(f, [164, 174], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const think = f >= 206 && f < 225;
+  const respIn = interpolate(f, [206, 216], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
   const caption = CAPTION(FACTS.length);
   const capLen = caption.reduce((n, g) => n + g.t.length, 0);
-  const capTyped = Math.floor(interpolate(f, [180, 245], [0, capLen], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
-  const zoom = still ? 1.05 : interpolate(frame, [0, 300], [1, 1.05], {extrapolateRight: "clamp"});
-  const shade = still ? 1 : interpolate(f, [10, 40], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
+  const capTyped = Math.floor(interpolate(f, [225, 300], [0, capLen], {extrapolateLeft: "clamp", extrapolateRight: "clamp"}));
+  const zoom = still ? 1.05 : interpolate(frame, [0, 345], [1, 1.05], {extrapolateRight: "clamp"});
+  const shade = still ? 1 : interpolate(f, [14, 48], [0, 1], {extrapolateLeft: "clamp", extrapolateRight: "clamp"});
   const parts = prompt.slice(0, still ? prompt.length : typed).split(/(Gemini,|factos mais interessantes|RUNWITHBROTO)/);
   return (
     <AbsoluteFill style={{background: INK}}>
@@ -62,7 +63,7 @@ const CoverChat: React.FC<{prompt: string; photo: string; pos: string; still?: b
           <Img src={staticFile(photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: pos}} />
         ) : (
           <Freeze frame={Math.min(frame, CLIP)}>
-            <OffthreadVideo src={staticFile("videos/01.mp4")} muted style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: pos}} />
+            <OffthreadVideo src={staticFile("videos/01.mp4")} muted playbackRate={RATE} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: pos}} />
           </Freeze>
         )}
       </AbsoluteFill>

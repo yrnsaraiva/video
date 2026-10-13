@@ -5,7 +5,7 @@ import numpy as np
 
 SR = 44100
 FPS = 30
-DUR = 10.0
+DUR = 11.5
 rng = np.random.default_rng(7)
 mix = np.zeros((int(SR * DUR), 2))
 
@@ -66,20 +66,20 @@ PROMPT_LEN = 65                      # len("Gemini, diz-me os factos mais intere
 RESP_LEN = 65                        # len("Aqui estão 8 factos sobre o RUNWITHBROTO. Desliza para descobrir.")
 fr = lambda f: f / FPS
 
-add(whoosh(), fr(14), gain=0.35)                         # a caixa da pergunta aparece
+add(whoosh(), fr(18), gain=0.35)                         # a caixa da pergunta aparece
 prev = 0
-for f in range(26, 157):                                 # pergunta escrita (frames 26 → 156)
-    k = int((f - 26) / 130 * PROMPT_LEN)
+for f in range(30, 200):                                 # pergunta escrita (frames 30 → 199), mais lenta
+    k = int((f - 30) / 169 * PROMPT_LEN)
     if k != prev:
         add(keyclick(rng.uniform(0.9, 1.15)), fr(f), pan=rng.uniform(-0.25, 0.25), gain=0.5)
         prev = k
-add(pop(), fr(160), gain=0.7)                            # botão premido
-for i, f in enumerate([164, 170, 176]):                  # a pensar
+add(pop(), fr(202), gain=0.7)                            # botão premido
+for i, f in enumerate([206, 213, 220]):                  # a pensar
     add(blip(620 + 90 * i), fr(f), gain=0.35)
-add(chime(), fr(180), gain=0.65)                         # ele sorri → resposta
+add(chime(), fr(225), gain=0.65)                         # ele sorri → resposta
 prev = 0
-for f in range(182, 246):                                # resposta escrita (frames 180 → 245), mais suave
-    k = int((f - 180) / 65 * RESP_LEN)
+for f in range(226, 301):                                # resposta escrita (frames 225 → 300), mais suave
+    k = int((f - 225) / 75 * RESP_LEN)
     if k != prev:
         add(softtick(rng.uniform(0.9, 1.1)), fr(f), pan=rng.uniform(-0.2, 0.2), gain=0.22)
         prev = k
