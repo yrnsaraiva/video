@@ -236,8 +236,8 @@ const LedNumber: React.FC<{text: string; accent: string}> = ({text, accent}) => 
   );
 };
 
-/** Facto 7: o laço rosa da consciencialização, feito de pontos, e o número — no céu, sem tapar a multidão. */
-const RibbonRow: React.FC<{text: string; accent: string}> = ({text, accent}) => {
+/** Facto 7: painel com o laço rosa da consciencialização (feito de pontos) e o número, encostado ao topo. */
+const RibbonPanel: React.FC<{text: string; accent: string}> = ({text, accent}) => {
   // laço clássico: argola oca em cima e duas pontas que se cruzam em X
   const shape = (
     <>
@@ -246,21 +246,22 @@ const RibbonRow: React.FC<{text: string; accent: string}> = ({text, accent}) => 
       <line x1="132" y1="104" x2="48" y2="268" />
     </>
   );
-  const T = "translate(6 6) scale(0.86)";
+  const T = "translate(40 20) scale(0.86)";
   return (
-    <svg width="952" height="250" viewBox="0 0 952 250" style={{position: "absolute", left: PAD, top: 70, filter: "drop-shadow(0 3px 10px rgba(0,0,0,0.65))"}}>
+    <svg width="952" height="270" viewBox="0 0 952 270" style={{position: "absolute", left: PAD, top: 56}}>
       <defs>
         <pattern id="rdots" width="10" height="10" patternUnits="userSpaceOnUse">
           <circle cx="5" cy="5" r="3.8" fill={accent} />
         </pattern>
         <mask id="rmask">
-          <rect width="952" height="250" fill="#000" />
+          <rect width="952" height="270" fill="#000" />
           <g transform={T} fill="none" stroke="#fff" strokeWidth="30" strokeLinecap="round">{shape}</g>
         </mask>
       </defs>
-      <g transform={T} fill="none" stroke={accent} strokeWidth="34" strokeLinecap="round" opacity="0.22">{shape}</g>
-      <g mask="url(#rmask)"><rect width="952" height="250" fill="url(#rdots)" /></g>
-      <text x="196" y="196" fontFamily={OSWALD} fontWeight={700} fontSize="200" fill={accent}>{text}</text>
+      <rect x="1" y="1" width="950" height="268" rx="30" fill="rgba(8,8,10,0.9)" stroke="rgba(255,255,255,0.14)" strokeWidth="2" />
+      <g transform={T} fill="none" stroke={accent} strokeWidth="34" strokeLinecap="round" opacity="0.16">{shape}</g>
+      <g mask="url(#rmask)"><rect width="952" height="270" fill="url(#rdots)" /></g>
+      <text x="262" y="206" fontFamily={OSWALD} fontWeight={700} fontSize="190" fill={accent} style={{filter: `drop-shadow(0 0 20px ${accent}66)`}}>{text}</text>
     </svg>
   );
 };
@@ -273,10 +274,10 @@ const Fact: React.FC<{s: FactSlide}> = ({s}) => {
       <Img src={staticFile(s.photo)} style={{width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos, transform: s.shift ? `translateY(${-s.shift}px)` : undefined, WebkitMaskImage: s.shift ? (s.shift > 0 ? `linear-gradient(180deg, #000 ${1350 - s.shift - 200}px, transparent ${1350 - s.shift}px)` : `linear-gradient(180deg, transparent ${-s.shift}px, #000 ${-s.shift + 220}px)`) : undefined, filter: s.cut ? "blur(4px) brightness(0.8)" : s.night ? "brightness(0.55) saturate(0.7) contrast(1.1)" : undefined}} />
       {s.night && <AbsoluteFill style={{background: "linear-gradient(180deg, rgba(8,24,70,0.78) 0%, rgba(14,40,110,0.45) 100%)", mixBlendMode: "multiply"}} />}
       {s.night && <Moon />}
-      {s.diagram && <AbsoluteFill style={{background: s.diagram === "night" ? "linear-gradient(180deg, rgba(8,14,36,0.9) 0%, rgba(8,14,36,0.75) 21%, rgba(8,14,36,0) 36%)" : "linear-gradient(180deg, rgba(11,11,11,0.65) 0%, rgba(11,11,11,0.2) 45%, rgba(11,11,11,0) 100%)"}} />}
+      {s.diagram && s.diagram !== "ribbon" && <AbsoluteFill style={{background: s.diagram === "night" ? "linear-gradient(180deg, rgba(8,14,36,0.9) 0%, rgba(8,14,36,0.75) 21%, rgba(8,14,36,0) 36%)" : "linear-gradient(180deg, rgba(11,11,11,0.65) 0%, rgba(11,11,11,0.2) 45%, rgba(11,11,11,0) 100%)"}} />}
       {s.diagram === "hybrid" && <HybridDiagram />}
       {s.diagram === "night" && <NightArt accent={s.accent} />}
-      {s.diagram === "ribbon" && s.stat && <RibbonRow text={s.stat.text} accent={s.accent} />}
+      {s.diagram === "ribbon" && s.stat && <RibbonPanel text={s.stat.text} accent={s.accent} />}
       {s.cut && (
         <div style={{position: "absolute", left: 0, right: 0, top: 120, textAlign: "center", fontFamily: OSWALD, fontWeight: 700, fontSize: 760, lineHeight: 1, color: s.accent, opacity: 0.95}}>
           {s.kicker.slice(-2)}

@@ -14,7 +14,7 @@ export type Slide = {kind: "cover"; prompt: string; photo: string; pos: string} 
 const BRAND = "#fabb00";
 // foto / recorte / enquadramento de cada facto (mesma ordem de FACTS em facts.ts)
 const LOOK = [
-  {pos: "49% 50%", shift: 170}, {pos: "28% 50%"}, {pos: "50% 60%"}, {pos: "50% 0%", shift: 290, diagram: "night"}, {pos: "50% 60%", diagram: "hybrid"}, {pos: "50% 50%"}, {pos: "50% 40%", shift: 200, diagram: "ribbon"}, {pos: "50% 0%"},
+  {pos: "49% 50%", shift: 170}, {pos: "28% 50%"}, {pos: "50% 60%"}, {pos: "50% 0%", shift: 290, diagram: "night"}, {pos: "50% 60%", diagram: "hybrid"}, {pos: "50% 50%"}, {pos: "50% 40%", shift: 140, diagram: "ribbon"}, {pos: "50% 0%"},
 ];
 const STAT = [undefined, undefined, undefined, undefined, undefined, {text: "+2500", led: true}, {text: "+1 000", ribbon: true}, {text: "25 JUN", stamp: true}];
 
